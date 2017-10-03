@@ -4,13 +4,16 @@ using UnityEngine;
 
 public class Player : MonoBehaviour {
 
-	// Use this for initialization
-	void Start () {
-		
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
+    [Header("Run settings")]
+    [SerializeField]
+    bool isAlwaysRunning = false;
+
+    [Header("Jump settings")]
+    [SerializeField]
+    float jumpHeight = 1.0f;
+
+    [Header("Attack settings")]
+    [SerializeField]
+    bool canAttack = true;
+
 }

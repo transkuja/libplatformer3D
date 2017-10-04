@@ -239,6 +239,30 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a7ba0d85810270048abc934fb30118ff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  hp: 3
+  hpSprite: {fileID: 0}
+  speedCap: 10
+  walkAnimation: {fileID: 0}
+  runAnimation: {fileID: 0}
+  isAlwaysRunning: 0
+  isSpeedIncreasingOverTime: 0
+  acceleration: 1
+  jumpHeight: 1
+  jumpRange: 1
+  useSameJumpSettingsForAllJumpTypes: 0
+  canDoubleJump: 0
+  doubleJumpHeight: 1
+  doubleJumpRange: 1
+  canWallJump: 0
+  wallJumpHeight: 1
+  wallJumpRange: 1
+  canHover: 0
+  hoverSpeed: 1
+  hoverHeightDecreaseRate: 1
+  fallingSpeed: 1
+  attacksEnabled: 1
+  canAttack: 1
+  attackDelay: 0.5
 --- !u!1 &1481418826
 GameObject:
   m_ObjectHideFlags: 0

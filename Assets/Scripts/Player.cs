@@ -4,13 +4,20 @@ using UnityEngine;
 
 public class Player : MonoBehaviour {
 
+    // Gameplay variables
+    [Header("General settings")]
+    [SerializeField]
+    int hp = 3;
+    [SerializeField]
+    Sprite hpSprite;
+
     [Header("Run settings")]
     [SerializeField]
     float speedCap = 10.0f;
     [SerializeField]
-    Animation walkAnimation;
+    AnimationClip walkAnimation;
     [SerializeField]
-    Animation runAnimation;
+    AnimationClip runAnimation;
     [SerializeField]
     bool isAlwaysRunning = false;
     [SerializeField]
@@ -49,9 +56,89 @@ public class Player : MonoBehaviour {
 
     [Header("Attack settings")]
     [SerializeField]
+    bool attacksEnabled = true;
+    [SerializeField]
     bool canAttack = true;
     [SerializeField]
-    [Range(1, 3)] int numberOfAttacks = 1;
+    Attack[] attacks;
+    [SerializeField]
+    float attackDelay = 0.5f;
 
 
+    // Process variables
+    float attackTimer = 0.0f;
+
+    public bool CanAttack
+    {
+        get
+        {
+            return canAttack;
+        }
+
+        set
+        {
+            canAttack = value;
+        }
+    }
+
+    private void Update()
+    {
+        if (attacksEnabled)
+        {
+            if (!canAttack)
+            {
+                if (attackTimer > 0.0f)
+                    attackTimer -= Time.unscaledDeltaTime;
+                else
+                {
+                    attackTimer = 0.0f;
+                    canAttack = true;
+                }
+            }
+        }
+    }
+
+    public void UseAttack(int attackIndex)
+    {
+        attacks[attackIndex].UseAttack();
+        attackTimer = attacks[attackIndex].AttackAnimation.length + attackDelay;
+        canAttack = false;
+    }
+
+    public int NumberOfAttacks
+    {
+        get
+        {
+            if (attacks != null)
+                return attacks.Length;
+            else
+                return 0;
+        }
+    }
+
+    public Attack[] Attacks
+    {
+        get
+        {
+            return attacks;
+        }
+
+        set
+        {
+            attacks = value;
+        }
+    }
+
+    public bool AttacksEnabled
+    {
+        get
+        {
+            return attacksEnabled;
+        }
+
+        set
+        {
+            attacksEnabled = value;
+        }
+    }
 }

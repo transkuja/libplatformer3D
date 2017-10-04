@@ -13,18 +13,32 @@ public class PlayerController : MonoBehaviour {
 	
 	void Update () {
         // Inputs
-        if (Input.GetButton("Fire1"))
+        if (Input.GetButton("Jump"))
             Jump();
-        if (Input.GetButton("Fire2"))
-            Attack();
+        if (player.AttacksEnabled && player.CanAttack)
+        {
+            if (player.NumberOfAttacks == 1)
+            {
+                if (Input.GetButton("Fire1") || Input.GetButton("Fire2") || Input.GetButton("Fire3"))
+                    player.Attacks[0].UseAttack();
+            }
+            else
+            {
+                if (player.NumberOfAttacks > 0)
+                {
+                    if (Input.GetButton("Fire1")) player.Attacks[0].UseAttack();
+                    if (Input.GetButton("Fire2")) player.Attacks[1].UseAttack();
+                }
+
+                if (player.NumberOfAttacks == 3)
+                {
+                    if (Input.GetButton("Fire3")) player.Attacks[2].UseAttack();
+                }
+            }    
+        }
     }
 
     void Jump()
-    {
-        // TODO
-    }
-
-    void Attack()
     {
         // TODO
     }

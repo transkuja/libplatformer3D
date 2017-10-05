@@ -14,7 +14,10 @@ public class PlayerController : MonoBehaviour {
 	void Update () {
         // Inputs
         if (Input.GetButton("Jump"))
-            Jump();
+        {
+            if (!player.IsNearInteractable)
+                Jump();
+        }
         if (player.AttacksEnabled && player.CanAttack)
         {
             if (player.NumberOfAttacks == 1)

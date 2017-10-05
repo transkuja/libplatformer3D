@@ -67,6 +67,8 @@ public class Player : MonoBehaviour {
 
     // Process variables
     float attackTimer = 0.0f;
+    bool isNearInteractable = false;
+    Interactable triggeredInteractable = null;
 
     public bool CanAttack
     {
@@ -95,6 +97,24 @@ public class Player : MonoBehaviour {
                     canAttack = true;
                 }
             }
+        }
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.GetComponentInParent<Interactable>() != null)
+        {
+            isNearInteractable = true;
+            triggeredInteractable = other.GetComponentInParent<Interactable>();
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.GetComponentInParent<Interactable>() != null)
+        {
+            isNearInteractable = false;
+            triggeredInteractable = null;
         }
     }
 
@@ -139,6 +159,32 @@ public class Player : MonoBehaviour {
         set
         {
             attacksEnabled = value;
+        }
+    }
+
+    public bool IsNearInteractable
+    {
+        get
+        {
+            return isNearInteractable;
+        }
+
+        set
+        {
+            isNearInteractable = value;
+        }
+    }
+
+    public Interactable TriggeredInteractable
+    {
+        get
+        {
+            return triggeredInteractable;
+        }
+
+        set
+        {
+            triggeredInteractable = value;
         }
     }
 }

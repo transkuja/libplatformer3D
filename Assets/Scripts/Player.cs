@@ -13,7 +13,9 @@ public class Player : MonoBehaviour {
 
     [Header("Run settings")]
     [SerializeField]
-    float speedCap = 10.0f;
+    float runningSpeed = 20.0f;
+    [SerializeField]
+    float walkingSpeed = 10.0f;
     [SerializeField]
     AnimationClip walkAnimation;
     [SerializeField]
@@ -53,6 +55,32 @@ public class Player : MonoBehaviour {
     float hoverHeightDecreaseRate = 1.0f;
     [SerializeField]
     float fallingSpeed = 1.0f;
+
+    public float RunningSpeed
+    {
+        get
+        {
+            return runningSpeed;
+        }
+
+        set
+        {
+            runningSpeed = value;
+        }
+    }
+
+    public float WalkingSpeed
+    {
+        get
+        {
+            return walkingSpeed;
+        }
+
+        set
+        {
+            walkingSpeed = value;
+        }
+    }
 
     private void Update()
     {

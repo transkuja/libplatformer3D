@@ -12,6 +12,12 @@ public class PlayerController : MonoBehaviour {
     CameraSettings cameraSettings;
     Vector3 offsetCamera;
 
+    // Camera lerp parameters
+    Vector3 oldCameraPosition;
+    Vector3 newCameraPosition;
+    float lerpValue;
+    bool isLerpActive = false;
+
     void Start () {
         player = GetComponent<Player>();
 
@@ -53,6 +59,20 @@ public class PlayerController : MonoBehaviour {
         CameraController();
     }
 
+    private void Update()
+    {
+        if (isLerpActive)
+        {
+            if (lerpValue < 1.0f)
+            {
+                playerCamera.transform.position = Vector3.Lerp(oldCameraPosition, newCameraPosition, lerpValue);
+                lerpValue += Time.unscaledDeltaTime * 100.0f;
+            }
+            else
+                isLerpActive = false;
+        }
+    }
+    
     void Jump()
     {
         // TODO
@@ -63,17 +83,18 @@ public class PlayerController : MonoBehaviour {
         playerCamera.transform.LookAt(transform);
         if (Vector3.Distance(playerCamera.transform.position, transform.position) > cameraSettings.DefaultDistanceFromPlayer)
         {
+            oldCameraPosition = playerCamera.transform.position;
             Vector3 currentOffset = transform.position - playerCamera.transform.position;
             float currentDistance = currentOffset.magnitude;
             float currentDistanceDiff = currentOffset.magnitude - cameraSettings.DefaultDistanceFromPlayer;
 
-            playerCamera.transform.position = new Vector3(
+            newCameraPosition = new Vector3(
                 playerCamera.transform.position.x + ((currentOffset.x > 0) ? currentDistanceDiff / 2 : -currentDistanceDiff / 2),
                 cameraSettings.DefaultRangeHeight,
                 playerCamera.transform.position.z + ((currentOffset.z > 0) ? currentDistanceDiff / 2 : -currentDistanceDiff / 2));
 
-            Debug.Log(playerCamera.transform.position.magnitude);
-            Debug.Log("Expected: " + cameraSettings.DefaultDistanceFromPlayer);
+            lerpValue = 0.0f;
+            isLerpActive = true;
         }
 
         if (cameraSettings.State == CameraState.Default)

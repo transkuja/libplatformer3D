@@ -9,9 +9,9 @@ public class CameraSettings : MonoBehaviour {
     CameraState state = CameraState.Default;
 
     [SerializeField]
-    float defaultDistanceFromPlayer;
+    float defaultDistanceFromPlayer = 10.0f;
     [SerializeField]
-    float defaultRangeHeight;
+    float defaultRangeHeight = 3.0f;
 
     [SerializeField]
     float closeRangeHeight;

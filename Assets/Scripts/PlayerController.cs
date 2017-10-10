@@ -61,8 +61,20 @@ public class PlayerController : MonoBehaviour {
     void CameraController()
     {
         playerCamera.transform.LookAt(transform);
-        //if (Vector3.Distance(playerCamera.transform.position, transform.position) > offsetCamera.magnitude)
-        //    playerCamera.transform.position = new Vector3(transform.position + offsetCamera;
+        if (Vector3.Distance(playerCamera.transform.position, transform.position) > cameraSettings.DefaultDistanceFromPlayer)
+        {
+            Vector3 currentOffset = transform.position - playerCamera.transform.position;
+            float currentDistance = currentOffset.magnitude;
+            float currentDistanceDiff = currentOffset.magnitude - cameraSettings.DefaultDistanceFromPlayer;
+
+            playerCamera.transform.position = new Vector3(
+                playerCamera.transform.position.x + ((currentOffset.x > 0) ? currentDistanceDiff / 2 : -currentDistanceDiff / 2),
+                cameraSettings.DefaultRangeHeight,
+                playerCamera.transform.position.z + ((currentOffset.z > 0) ? currentDistanceDiff / 2 : -currentDistanceDiff / 2));
+
+            Debug.Log(playerCamera.transform.position.magnitude);
+            Debug.Log("Expected: " + cameraSettings.DefaultDistanceFromPlayer);
+        }
 
         if (cameraSettings.State == CameraState.Default)
         {

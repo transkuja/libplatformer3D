@@ -11,8 +11,16 @@ public class PlayerController : MonoBehaviour {
     Camera playerCamera;
     CameraSettings cameraSettings;
     Vector3 offsetCamera;
+    [SerializeField]
+    Transform cameraReferences;
 
-    void Start () {
+    // Lerp variables
+    bool isLerpActive;
+    Vector3 camOldPosition;
+    Vector3 camNewPosition;
+    float lerpValue;
+
+    void Start() {
         player = GetComponent<Player>();
 
         // Initialize player rigidbody
@@ -30,10 +38,10 @@ public class PlayerController : MonoBehaviour {
             playerCamera.gameObject.AddComponent<CameraSettings>();
         cameraSettings = playerCamera.GetComponent<CameraSettings>();
         cameraSettings.State = CameraState.Default;
-        offsetCamera = transform.position - playerCamera.transform.position;
+        offsetCamera = playerCamera.transform.position - transform.position;
     }
 
-    void FixedUpdate () {
+    void FixedUpdate() {
         // Inputs
         if (Input.GetButton("Jump"))
             Jump();
@@ -48,6 +56,10 @@ public class PlayerController : MonoBehaviour {
 
         rb.velocity = computedVelocity.z * cameraForwardVectorProjected + computedVelocity.x * Camera.main.transform.right + Vector3.up * rb.velocity.y;
         transform.LookAt(transform.position + new Vector3(rb.velocity.x, 0.0f, rb.velocity.z));
+        if (Input.GetAxisRaw("Vertical") > 0.01f || Input.GetAxisRaw("Vertical") < -0.01f)
+        {
+           UpdateCameraPosition();
+        }
 
         // Handle Camera
         CameraController();
@@ -58,9 +70,52 @@ public class PlayerController : MonoBehaviour {
         // TODO
     }
 
+    void UpdateCameraPosition()
+    {
+        //if (Vector3.Distance(playerCamera.transform.position, transform.position) != offsetCamera)
+        //{
+
+        //}
+
+        //if (playerCamera.transform.position.y - transform.position.y != cameraSettings.DefaultRangeHeight)
+        //{
+        //    playerCamera.transform.position = new Vector3(playerCamera.transform.position.x, cameraSettings.DefaultRangeHeight, playerCamera.transform.position.z);
+        //}
+
+        // sol1?
+        if (Vector3.Distance(playerCamera.transform.position, transform.position) > cameraSettings.DefaultDistanceFromPlayer)
+        {
+            playerCamera.transform.position = transform.position + (playerCamera.transform.rotation * offsetCamera);
+            //Vector3 cameraOffset = playerCamera.transform.position - transform.position;
+            //camOldPosition = playerCamera.transform.position;
+            //camNewPosition = transform.position + cameraOffset;
+            //isLerpActive = true;
+            //lerpValue = 0.0f;
+        }
+    }
+
+    private void Update()
+    {
+        if (isLerpActive)
+        {
+            if (lerpValue < 1.0f)
+            {
+                lerpValue += Time.deltaTime * 1000.0f;
+                playerCamera.transform.position = Vector3.Lerp(camOldPosition, camNewPosition, lerpValue);
+            }
+            else
+                isLerpActive = false;
+        }
+    }
+
     void CameraController()
     {
-        playerCamera.transform.LookAt(transform);
+        if ((Input.GetAxis("Horizontal") > -0.01f && Input.GetAxis("Horizontal") < 0.01f) 
+            && (Input.GetAxis("Vertical") > -0.01f && Input.GetAxis("Vertical") < 0.01f))
+            playerCamera.transform.LookAt(transform);
+        else
+            playerCamera.transform.LookAt(cameraReferences.GetChild(0).transform);
+
         if (Vector3.Distance(playerCamera.transform.position, transform.position) > cameraSettings.DefaultDistanceFromPlayer)
         {
             Vector3 currentOffset = transform.position - playerCamera.transform.position;

@@ -1,0 +1,18 @@
+largeur
+vitesse
+accel
+hauteur de saut 
+gravité
+
+check des collider
+foreach collider => check ceux qui sont atteignables (défini par les param au dessus)
+1er jet: statique
+2e jet: prendre en compte les déplacements au cours du temps
+si l'algo retourne aucun => inaccessible
+
+evaluation du temps en fct de la vitesse du perso + hauteur de saut + accel etc.
+
+draw chemins
+
+test plateformes "plates", puis avec un angle max (angle max en param?)
+

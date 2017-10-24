@@ -1,8 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEditor;
 
-public class LDChecker : MonoBehaviour {
+public class LDChecker : Editor {
 
     List<Collider> colliders;
 
@@ -21,7 +22,6 @@ public class LDChecker : MonoBehaviour {
             if (tmpColliders[i].isTrigger == false)
             {
                 colliders.Add(tmpColliders[i]);
-                Debug.Log(tmpColliders[i]);
             }
         }
         

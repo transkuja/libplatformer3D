@@ -7,10 +7,30 @@ public class LDChecker : Editor {
 
     List<Collider> colliders;
 
+    float jumpHeight;
+    float jumpRange;
+    float testMaxDistance;
+    float gravity;
+    float jumpRangeEpsilon;
+
+    float maxParabolA;
+    float maxParabolB;
+    Vector2 maxParabolHeight;
+
     void Start()
     {
+        testMaxDistance = Mathf.Sqrt(jumpHeight * jumpHeight + (jumpRange + Mathf.Log(gravity)) * (jumpRange + Mathf.Log(gravity)));
+        ComputeMaxParabol();
         LoadColliders();
     }
+
+    void ComputeMaxParabol()
+    {
+        maxParabolHeight = new Vector2(jumpRange / 2.0f, jumpHeight);
+        maxParabolA = -gravity;
+        maxParabolB = 2 * maxParabolA * maxParabolHeight.y;
+    }
+
 
     void LoadColliders()
     {
@@ -34,9 +54,12 @@ public class LDChecker : Editor {
             if (col != _collider)
             {
                 // if collider within range (box jump height/jump range + epsilon)
-                // 
-                //if ()
-                { }
+                if (Vector3.Distance(_collider.transform.position, col.transform.position) < testMaxDistance)
+                {
+                    Vector3 direction = col.transform.position - _collider.transform.position;
+                    direction.y = 0.0f;
+
+                }
                 // check reachability (jump height, jump range, 
                 // f(x) = a(x-Xs)² + Ys, avec Xs et Ys les coordonnées du sommet de la parabole
                 // a influe sur la pente, est forcément négatif (pour retourner la courbe). Plus il est petit plus la gravité est faible (+ de temps à monter et retomber)

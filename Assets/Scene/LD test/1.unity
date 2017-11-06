@@ -217,6 +217,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 824d0af44d7a1774bb2dcb9c883935e4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  jumpHeight: 3
+  jumpRange: 5
+  testMaxDistance: 500
+  gravity: 1
+  maxParabolA: -1
   parabolTestA: -1
   parabolTestC: 0
   parabolTestB: 5

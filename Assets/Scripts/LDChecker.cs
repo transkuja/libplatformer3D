@@ -3,16 +3,17 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class LDChecker : MonoBehaviour {
+    private static LDChecker instance = null;
 
     List<Collider> colliders;
 
-    float jumpHeight;
-    float jumpRange;
-    float testMaxDistance;
-    float gravity;
+    public float jumpHeight;
+    public float jumpRange;
+    public float testMaxDistance;
+    public float gravity;
     float jumpRangeEpsilon;
 
-    float maxParabolA;
+    public float maxParabolA;
     float maxParabolB;
     Vector2 maxParabolHeight;
 
@@ -23,10 +24,29 @@ public class LDChecker : MonoBehaviour {
 
     void Start()
     {
+        instance = this;
         testMaxDistance = Mathf.Sqrt(jumpHeight * jumpHeight + (jumpRange + Mathf.Log(gravity)) * (jumpRange + Mathf.Log(gravity)));
         ComputeMaxParabol();
         LoadColliders();
+        foreach (Collider col in colliders)
+            CheckAccessibility(col);
     }
+
+    public static LDChecker Instance
+    {
+        get
+        {
+            if (instance == null)
+            {
+                instance = new GameObject("LDChecker").AddComponent<LDChecker>();
+                DontDestroyOnLoad(instance);
+            }
+            return instance;
+        }
+
+        private set { }
+    }
+
 
     void ComputeMaxParabol()
     {
@@ -46,6 +66,7 @@ public class LDChecker : MonoBehaviour {
             if (tmpColliders[i].isTrigger == false)
             {
                 colliders.Add(tmpColliders[i]);
+                tmpColliders[i].gameObject.AddComponent<GizmosDraw>();
             }
         }
         
@@ -60,8 +81,11 @@ public class LDChecker : MonoBehaviour {
                 // if collider within range (box jump height/jump range + epsilon)
                 if (Vector3.Distance(_collider.transform.position, col.transform.position) < testMaxDistance)
                 {
+                    Debug.Log("1");
                     Vector3 direction = col.transform.position - _collider.transform.position;
                     direction.y = 0.0f;
+
+                    _collider.GetComponent<GizmosDraw>().Directions.Add(direction.normalized);
 
                 }
                 // check reachability (jump height, jump range, 

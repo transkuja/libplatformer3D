@@ -9,6 +9,7 @@ public static class ParabolGizmosDrawer
     {
         float step = 0.05f;
         Gizmos.color = Color.red;
+        _from.ShowAccessiblePlatformsFromHere();
 
         if (_from.Parabolas.Count == 0)
             return;

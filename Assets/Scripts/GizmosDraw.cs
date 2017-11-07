@@ -37,9 +37,6 @@ public class Parabola
     public float GetY(Vector3 _position)
     {
         float x = Vector3.Dot(direction, _position);
-        //Debug.Log(x);
-        //Debug.Log(a + "x² + " + b + "x + " + c);
-        //Debug.Log(a * x * x + b * x + c);
         return a * x * x + b * x + c;
     }
 
@@ -58,6 +55,18 @@ public class GizmosDraw : MonoBehaviour {
 
     public bool drawn = false;
     public bool isAccessible = false;
+    private List<GizmosDraw> areAccessibleFromThis;
+
+    public List<GizmosDraw> AreAccessibleFromThis
+    {
+        get
+        {
+            if (areAccessibleFromThis == null)
+                areAccessibleFromThis = new List<GizmosDraw>();
+
+            return areAccessibleFromThis;
+        }
+    }
 
     public List<Vector3> Directions
     {
@@ -83,13 +92,19 @@ public class GizmosDraw : MonoBehaviour {
 
     public void AddNearPlatformPosition(Transform _nearTransform)
     {
-        if (_nearTransform.name == "Platform (1)")
-        {
-            Debug.Log("added platform 1 by " + this.name);
-            Debug.Log("accessible was : " + _nearTransform.GetComponent<GizmosDraw>().isAccessible);
-        }
         NearPlatformPositions.Add(_nearTransform.position);
         _nearTransform.GetComponent<GizmosDraw>().isAccessible = true;
+        AreAccessibleFromThis.Add(_nearTransform.GetComponent<GizmosDraw>());
+    }
+
+    public void ShowAccessiblePlatformsFromHere()
+    {
+        LDChecker.Instance.UnshowAccessibility();
+        foreach (GizmosDraw gd in areAccessibleFromThis)
+        {
+            gd.GetComponentInChildren<MeshRenderer>().material.color = Color.green;
+        }
+        GetComponentInChildren<MeshRenderer>().material.color = Color.yellow;
     }
 
     public List<Parabola> Parabolas

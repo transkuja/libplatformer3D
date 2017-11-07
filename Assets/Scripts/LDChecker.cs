@@ -104,14 +104,17 @@ public class LDChecker : MonoBehaviour {
 
     void ShowAccessibility(Collider _collider)
     {
+        if (_collider.GetComponent<GizmosDraw>().isAccessible)
+            _collider.GetComponentInChildren<MeshRenderer>().material.color = Color.green;
+        else
+            _collider.GetComponentInChildren<MeshRenderer>().material.color = Color.red;
+    }
+
+    public void UnshowAccessibility()
+    {
         foreach (Collider col in colliders)
         {
-            Debug.Log(col.name);
-            Debug.Log(_collider.GetComponent<GizmosDraw>().isAccessible);
-            if (_collider.GetComponent<GizmosDraw>().isAccessible)
-                _collider.GetComponentInChildren<MeshRenderer>().material.color = Color.green;
-            else
-                _collider.GetComponentInChildren<MeshRenderer>().material.color = Color.red;
+            col.GetComponentInChildren<MeshRenderer>().material.color = Color.red;
         }
     }
 }

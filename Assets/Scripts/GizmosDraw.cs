@@ -34,16 +34,15 @@ public class Parabola
         direction = _direction;
     }
 
-    public float GetY(Vector3 _position)
+    public float GetY(float x)
     {
-        float x = Vector3.Dot(direction, _position);
         return a * x * x + b * x + c;
     }
 
     public Vector3 GetPointInWorld(Vector3 _position, Vector3 _parabolaStartPosition)
     {
         float x = Vector3.Dot(direction, _position);
-        float y = GetY(_position);
+        float y = GetY(x);
         return Vector3.up * (y) + direction * x + _parabolaStartPosition;
     }
 }

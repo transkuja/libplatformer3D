@@ -81,11 +81,7 @@ public class LDChecker : MonoBehaviour {
                 // if collider within range (box jump height/jump range + epsilon)
                 if (Vector3.Distance(_collider.transform.position, col.transform.position) < testMaxDistance)
                 {
-                    Debug.Log("1");
-                    Vector3 direction = col.transform.position - _collider.transform.position;
-                    direction.y = 0.0f;
-
-                    _collider.GetComponent<GizmosDraw>().Directions.Add(direction.normalized);
+                    _collider.GetComponent<GizmosDraw>().NearPlatformPositions.Add(col.transform.position);
 
                 }
                 // check reachability (jump height, jump range, 

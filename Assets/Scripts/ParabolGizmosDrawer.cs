@@ -8,32 +8,19 @@ public static class ParabolGizmosDrawer
     static void DrawParabolGizmos(GizmosDraw _from, GizmoType drawnGizmoType)
     {
         float step = 0.05f;
-        //if (_from.drawn)
-        //    return;
-
-        Gizmos.color = Color.cyan;
-        // Test
-        Gizmos.DrawCube(Vector3.zero, Vector3.one);
-
         Gizmos.color = Color.red;
 
-        // -a(x - jumpRange/2)² + jumpHeight
-        foreach (Vector3 direction in _from.Directions)
+        for (int i = 0; i < _from.Parabols.Count; i++)
         {
-            for (float i = 0; i < 20; i += step)
+            Gizmos.DrawCube(_from.transform.position + _from.Directions[i] * LDChecker.Instance.jumpRange, Vector3.one);
+            for (float x = 0; x < 10; x += step)
             {
-                //Debug.Log("x = " + i);
-                //Debug.Log("y = " + (LDChecker.Instance.maxParabolA * (i - (LDChecker.Instance.jumpRange / 2.0f)) * (i - (LDChecker.Instance.jumpRange / 2.0f)) + LDChecker.Instance.jumpHeight));
-                Gizmos.DrawLine(Vector3.up * (LDChecker.Instance.maxParabolA * Mathf.Pow(i - (LDChecker.Instance.jumpRange / 2.0f), 2) + LDChecker.Instance.jumpHeight) + direction * i + _from.transform.position,
-                    Vector3.up * (LDChecker.Instance.maxParabolA * Mathf.Pow((i + step) - (LDChecker.Instance.jumpRange / 2.0f), 2) + LDChecker.Instance.jumpHeight) + direction * (i + step) + _from.transform.position);
+                Gizmos.DrawLine(Vector3.up * (_from.Parabols[i].a * x * x + _from.Parabols[i].b * x + _from.Parabols[i].c) + _from.Directions[i] * x + _from.transform.position,
+                    Vector3.up * (_from.Parabols[i].a * (x+step) * (x+step) + _from.Parabols[i].b * (x+step) + _from.Parabols[i].c) + _from.Directions[i] * (x+step) + _from.transform.position);
             }
         }
-        //_from.drawn = true;
+        Gizmos.DrawCube(_from.transform.position + Vector3.up * LDChecker.Instance.jumpHeight, Vector3.one);
+
     }
 
-    //[DrawGizmo(GizmoType.NotInSelectionHierarchy)]
-    //static void DrawParabolGizmosReset(GizmosDraw _from, GizmoType drawnGizmoType)
-    //{
-    //    _from.drawn = false;
-    //}
 }

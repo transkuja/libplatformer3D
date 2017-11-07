@@ -30,6 +30,9 @@ public class LDChecker : MonoBehaviour {
         LoadColliders();
         foreach (Collider col in colliders)
             CheckAccessibility(col);
+        foreach (Collider col in colliders)
+            ShowAccessibility(col);
+
     }
 
     public static LDChecker Instance
@@ -79,15 +82,36 @@ public class LDChecker : MonoBehaviour {
             if (col != _collider)
             {
                 // if collider within range (box jump height/jump range + epsilon)
-                if (Vector3.Distance(_collider.transform.position, col.transform.position) < testMaxDistance)
-                {
-                    _collider.GetComponent<GizmosDraw>().NearPlatformPositions.Add(col.transform.position);
+                //if (Vector3.Distance(_collider.transform.position, col.transform.position) < testMaxDistance)
+                //{
+                Parabola testParabola = new Parabola(_collider.transform, col.transform);
 
+                Vector3 posOnParabola = testParabola.GetPointInWorld(col.transform.position, _collider.transform.position);
+
+                if (col.name == "Platform (1)" && _collider.name == "Platform (3)")
+                {
+                    Debug.Log(posOnParabola.y);
+                    Debug.Log(col.transform.position.y);
                 }
-                // check reachability (jump height, jump range, 
-                // f(x) = a(x-Xs)² + Ys, avec Xs et Ys les coordonnées du sommet de la parabole
-                // a influe sur la pente, est forcément négatif (pour retourner la courbe). Plus il est petit plus la gravité est faible (+ de temps à monter et retomber)
+                if (posOnParabola.y > col.transform.position.y)
+                {
+                    _collider.GetComponent<GizmosDraw>().AddNearPlatformPosition(col.transform);
+                }
+                //}
             }
+        }
+    }
+
+    void ShowAccessibility(Collider _collider)
+    {
+        foreach (Collider col in colliders)
+        {
+            Debug.Log(col.name);
+            Debug.Log(_collider.GetComponent<GizmosDraw>().isAccessible);
+            if (_collider.GetComponent<GizmosDraw>().isAccessible)
+                _collider.GetComponentInChildren<MeshRenderer>().material.color = Color.green;
+            else
+                _collider.GetComponentInChildren<MeshRenderer>().material.color = Color.red;
         }
     }
 }

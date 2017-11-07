@@ -9,6 +9,7 @@ public class Parabola
     public float b;
     public float c;
     public Vector3 direction; // Used to know on which plane the parabola is
+    public Vector3 origin;
 
     Parabola() { }
     public Parabola(float x1, float x2)
@@ -32,6 +33,7 @@ public class Parabola
 
         a = tmp.a; b = tmp.b; c = tmp.c;
         direction = _direction;
+        origin = currentCollider.position;
     }
 
     public float GetY(float x)
@@ -41,7 +43,8 @@ public class Parabola
 
     public Vector3 GetPointInWorld(Vector3 _position, Vector3 _parabolaStartPosition)
     {
-        float x = Vector3.Dot(direction, _position);
+        //float x = Vector3.Dot(direction, _position);
+        float x = Vector3.Distance(new Vector3(_parabolaStartPosition.x, 0.0f, _parabolaStartPosition.z), new Vector3(_position.x, 0.0f, _position.z));
         float y = GetY(x);
         return Vector3.up * (y) + direction * x + _parabolaStartPosition;
     }

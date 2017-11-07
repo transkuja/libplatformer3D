@@ -21,6 +21,8 @@ public class LDChecker : MonoBehaviour {
     public int parabolTestA;
     public int parabolTestC;
     public int parabolTestB;
+    Parabola drawParabola;
+    Vector3 drawPosOnParabola;
 
     void Start()
     {
@@ -84,20 +86,28 @@ public class LDChecker : MonoBehaviour {
                 // if collider within range (box jump height/jump range + epsilon)
                 //if (Vector3.Distance(_collider.transform.position, col.transform.position) < testMaxDistance)
                 //{
-                Parabola testParabola = new Parabola(_collider.transform, col.transform);
+                    Parabola testParabola = new Parabola(_collider.transform, col.transform);
 
-                Vector3 posOnParabola = testParabola.GetPointInWorld(col.transform.position, _collider.transform.position);
+                    Vector3 posOnParabola = testParabola.GetPointInWorld(col.transform.position, _collider.transform.position);
 
-                if (col.name == "Platform (3)" && _collider.name == "Platform (1)")
-                {
-                    Debug.Log(posOnParabola.y);
-                    Debug.Log(col.transform.position.y);
-                }
 
-                if (posOnParabola.y > col.transform.position.y)
-                {
-                    _collider.GetComponent<GizmosDraw>().AddNearPlatformPosition(col.transform);
-                }
+                    if (col.name == "Platform (3)" && _collider.name == "Platform (1)")
+                    {
+                        Debug.Log(posOnParabola.y);
+                        Debug.Log(col.transform.position.y);
+                        drawParabola = testParabola;
+
+                    drawPosOnParabola = posOnParabola;
+                        Debug.Log("x = " + Vector3.Dot(drawParabola.direction, col.transform.position));
+                    Debug.Log(Vector3.Distance(new Vector3(col.transform.position.x, 0.0f, col.transform.position.z), new Vector3(_collider.transform.position.x, 0.0f, _collider.transform.position.z)));
+                        Debug.Log(drawParabola.a + "x² + " + drawParabola.b + "x + " + drawParabola.c);
+                        Debug.Log("y = " + posOnParabola.y);
+                    }
+
+                    if (posOnParabola.y > col.transform.position.y)
+                    {
+                        _collider.GetComponent<GizmosDraw>().AddNearPlatformPosition(col.transform);
+                    }
                 //}
             }
         }
@@ -117,5 +127,21 @@ public class LDChecker : MonoBehaviour {
         {
             col.GetComponentInChildren<MeshRenderer>().material.color = Color.red;
         }
+    }
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.magenta;
+        if (drawParabola != null)
+        {
+            for (float x = 0; x < 10; x += 0.05f)
+            {
+                Gizmos.DrawLine(Vector3.up * (drawParabola.a * x * x + drawParabola.b * x + drawParabola.c) + drawParabola.direction * x + drawParabola.origin,
+                    Vector3.up * (drawParabola.a * (x + 0.05f) * (x + 0.05f) + drawParabola.b * (x + 0.05f) + drawParabola.c) + drawParabola.direction * (x + 0.05f) + drawParabola.origin);
+            }
+        }
+        if (drawPosOnParabola != null)
+            Gizmos.DrawCube(drawPosOnParabola, Vector3.one*0.5f);
+
     }
 }

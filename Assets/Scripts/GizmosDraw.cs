@@ -100,11 +100,15 @@ public class GizmosDraw : MonoBehaviour {
     public void ShowAccessiblePlatformsFromHere()
     {
         LDChecker.Instance.UnshowAccessibility();
+        GetComponentInChildren<MeshRenderer>().material.color = Color.yellow;
+
+        if (areAccessibleFromThis == null)
+            return;
+
         foreach (GizmosDraw gd in areAccessibleFromThis)
         {
             gd.GetComponentInChildren<MeshRenderer>().material.color = Color.green;
         }
-        GetComponentInChildren<MeshRenderer>().material.color = Color.yellow;
     }
 
     public List<Parabola> Parabolas

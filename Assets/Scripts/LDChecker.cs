@@ -88,11 +88,12 @@ public class LDChecker : MonoBehaviour {
 
                 Vector3 posOnParabola = testParabola.GetPointInWorld(col.transform.position, _collider.transform.position);
 
-                if (col.name == "Platform (1)" && _collider.name == "Platform (3)")
+                if (col.name == "Platform (3)" && _collider.name == "Platform (1)")
                 {
                     Debug.Log(posOnParabola.y);
                     Debug.Log(col.transform.position.y);
                 }
+
                 if (posOnParabola.y > col.transform.position.y)
                 {
                     _collider.GetComponent<GizmosDraw>().AddNearPlatformPosition(col.transform);

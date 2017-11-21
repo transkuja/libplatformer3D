@@ -48,6 +48,23 @@ public class Parabola
         float y = GetY(x);
         return Vector3.up * (y) + direction * x + _parabolaStartPosition;
     }
+
+    public Vector3[] GetNPointsInWorld(Vector3 _position, Vector3 _colliderExtents, Vector3 _parabolaStartPosition, int nbPoints)
+    {
+        //float x = Vector3.Dot(direction, _position);
+        Vector3[] result = new Vector3[nbPoints];
+        float xmax = Vector3.Distance(new Vector3(_parabolaStartPosition.x, 0.0f, _parabolaStartPosition.z), new Vector3(_position.x, 0.0f, _position.z));
+        float xextents = Vector3.Distance(new Vector3(_parabolaStartPosition.x, 0.0f, _parabolaStartPosition.z), new Vector3(_position.x - _colliderExtents.x, 0.0f, _position.z - _colliderExtents.z));
+
+        float factor = (xmax - xextents) / nbPoints;
+        for (int i = 1; i <= nbPoints; i++)
+        {
+           float xtmp = xextents + (factor * i);
+           result[i - 1] = Vector3.up * GetY(xtmp) + direction * xtmp + _parabolaStartPosition;
+        }
+
+        return result;
+    }
 }
 
 public class GizmosDraw : MonoBehaviour {

@@ -22,7 +22,7 @@ public class LDChecker : MonoBehaviour {
     public int parabolTestC;
     public int parabolTestB;
     Parabola drawParabola;
-    Vector3 drawPosOnParabola;
+    Vector3[] drawPosOnParabola;
 
     void Start()
     {
@@ -88,12 +88,14 @@ public class LDChecker : MonoBehaviour {
                 //{
                 Parabola testParabola = new Parabola(_collider.transform, col.transform);
 
-                Vector3 posOnParabola = testParabola.GetPointInWorld(col.transform.position, _collider.transform.position);
+                //Vector3 posOnParabola = testParabola.GetPointInWorld(col.transform.position, _collider.transform.position);
+
+                Vector3[] posOnParabola = testParabola.GetNPointsInWorld(col.transform.position, col.bounds.extents, _collider.transform.position, 10);
 
                 // DEBUG
-                if (col.name == "Platform (3)" && _collider.name == "Platform (1)")
+                if (col.name == "Platform" && _collider.name == "Plane")
                 {
-                    Debug.Log(posOnParabola.y);
+                   // Debug.Log(posOnParabola.y);
                     Debug.Log(col.transform.position.y);
                     drawParabola = testParabola;
 
@@ -101,16 +103,30 @@ public class LDChecker : MonoBehaviour {
                     Debug.Log("x = " + Vector3.Dot(drawParabola.direction, col.transform.position));
                     Debug.Log(Vector3.Distance(new Vector3(col.transform.position.x, 0.0f, col.transform.position.z), new Vector3(_collider.transform.position.x, 0.0f, _collider.transform.position.z)));
                     Debug.Log(drawParabola.a + "x² + " + drawParabola.b + "x + " + drawParabola.c);
-                    Debug.Log("y = " + posOnParabola.y);
+                   // Debug.Log("y = " + posOnParabola.y);
                 }
 
-                if (posOnParabola.y > col.transform.position.y)
+                
+                if (ThereIsAPointAbove(posOnParabola, col))
                 {
                     _collider.GetComponent<GizmosDraw>().AddNearPlatformPosition(col.transform);
                 }
+                
                 //}
             }
         }
+
+    }
+
+    bool ThereIsAPointAbove(Vector3[] posOnParabola, Collider _currentCollider)
+    {
+        for (int i = 0; i < posOnParabola.Length; i++)
+        {
+            if (posOnParabola[i].y > _currentCollider.transform.position.y + _currentCollider.bounds.extents.y)
+                return true;
+        }
+
+        return false;
     }
 
     void ShowAccessibility(Collider _collider)
@@ -141,7 +157,10 @@ public class LDChecker : MonoBehaviour {
             }
         }
         if (drawPosOnParabola != null)
-            Gizmos.DrawCube(drawPosOnParabola, Vector3.one*0.5f);
+        {
+            for (int i = 0; i < drawPosOnParabola.Length; i++)
+                Gizmos.DrawCube(drawPosOnParabola[i], Vector3.one * 0.5f);
+        }
 
     }
 }

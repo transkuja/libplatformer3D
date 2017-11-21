@@ -25,6 +25,7 @@ public static class ParabolGizmosDrawer
         }
         Gizmos.DrawCube(_from.transform.position + Vector3.up * LDChecker.Instance.jumpHeight, Vector3.one);
 
+        
     }
 
 }

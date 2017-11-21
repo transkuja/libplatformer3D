@@ -225,6 +225,13 @@ MonoBehaviour:
   parabolTestA: -1
   parabolTestC: 0
   parabolTestB: 5
+  drawDebugParabolas: 0
+  debugParabolasColor: {r: 1, g: 0, b: 1, a: 1}
+  startCollider: {fileID: 2002738807}
+  targetCollider: {fileID: 987237655}
+  drawDetectionPoints: 0
+  debugDetectionPoitnsColor: {r: 1, g: 0, b: 1, a: 1}
+  nbOfPointsForDetection: 0
 --- !u!4 &369387249
 Transform:
   m_ObjectHideFlags: 0

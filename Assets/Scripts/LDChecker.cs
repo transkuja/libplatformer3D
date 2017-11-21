@@ -17,13 +17,17 @@ public class LDChecker : MonoBehaviour {
     float maxParabolB;
     Vector2 maxParabolHeight;
 
-    // TEST
-    public int parabolTestA;
-    public int parabolTestC;
-    public int parabolTestB;
-    Parabola drawParabola;
-    Vector3[] drawPosOnParabola;
-
+    // Debug variables
+    [Header("Debug")]
+    public bool drawDebugParabolas;
+    public Color debugParabolasColor = Color.magenta;
+    public GameObject startCollider;
+    public GameObject targetCollider;
+    public bool drawDetectionPoints;
+    public Color debugDetectionPoitnsColor = Color.magenta;
+    public int nbOfPointsForDetection;
+    private List<Collider> debugDrawTargets;
+    
     void Start()
     {
         instance = this;
@@ -88,34 +92,32 @@ public class LDChecker : MonoBehaviour {
                 //{
                 Parabola testParabola = new Parabola(_collider.transform, col.transform);
 
-                //Vector3 posOnParabola = testParabola.GetPointInWorld(col.transform.position, _collider.transform.position);
-
                 Vector3[] posOnParabola = testParabola.GetNPointsInWorld(col.transform.position, col.bounds.extents, _collider.transform.position, 10);
-
-                // DEBUG
-                if (col.name == "Platform" && _collider.name == "Plane")
-                {
-                   // Debug.Log(posOnParabola.y);
-                    Debug.Log(col.transform.position.y);
-                    drawParabola = testParabola;
-
-                    drawPosOnParabola = posOnParabola;
-                    Debug.Log("x = " + Vector3.Dot(drawParabola.direction, col.transform.position));
-                    Debug.Log(Vector3.Distance(new Vector3(col.transform.position.x, 0.0f, col.transform.position.z), new Vector3(_collider.transform.position.x, 0.0f, _collider.transform.position.z)));
-                    Debug.Log(drawParabola.a + "x² + " + drawParabola.b + "x + " + drawParabola.c);
-                   // Debug.Log("y = " + posOnParabola.y);
-                }
-
                 
                 if (ThereIsAPointAbove(posOnParabola, col))
                 {
                     _collider.GetComponent<GizmosDraw>().AddNearPlatformPosition(col.transform);
                 }
-                
-                //}
             }
         }
 
+    }
+
+    List<Parabola> DebugGetParabolasForNearColliders(Collider _startCollider)
+    {
+        List<Parabola> result = new List<Parabola>();
+        debugDrawTargets = new List<Collider>();
+
+        foreach (Collider col in colliders)
+        {
+            if (col != _startCollider && Vector3.Distance(_startCollider.transform.position, col.transform.position) < (2 * jumpHeight + 2 * jumpRange))
+            {
+                result.Add(new Parabola(_startCollider.transform, col.transform));
+                debugDrawTargets.Add(col);
+            }
+        }
+
+        return result;
     }
 
     bool ThereIsAPointAbove(Vector3[] posOnParabola, Collider _currentCollider)
@@ -147,20 +149,50 @@ public class LDChecker : MonoBehaviour {
 
     private void OnDrawGizmos()
     {
-        Gizmos.color = Color.magenta;
-        if (drawParabola != null)
+        if (drawDebugParabolas)
         {
-            for (float x = 0; x < 10; x += 0.05f)
+            Gizmos.color = debugParabolasColor;
+            if (startCollider != null)
             {
-                Gizmos.DrawLine(Vector3.up * (drawParabola.a * x * x + drawParabola.b * x + drawParabola.c) + drawParabola.direction * x + drawParabola.origin,
-                    Vector3.up * (drawParabola.a * (x + 0.05f) * (x + 0.05f) + drawParabola.b * (x + 0.05f) + drawParabola.c) + drawParabola.direction * (x + 0.05f) + drawParabola.origin);
-            }
+                if (targetCollider != null)
+                {
+                    Parabola parabola = new Parabola(startCollider.transform, targetCollider.transform);
+                    DebugDrawParabola(parabola);
+                    DebugDrawDetectionPoints(parabola, targetCollider);
+                }
+                else
+                {
+                    List<Parabola> drawParabolas = DebugGetParabolasForNearColliders(startCollider.GetComponent<Collider>());
+                    for (int i = 0; i < drawParabolas.Count; i++)
+                    {
+                        DebugDrawParabola(drawParabolas[i]);
+                        DebugDrawDetectionPoints(drawParabolas[i], debugDrawTargets[i].gameObject);
+                    }
+                }
+            }         
         }
-        if (drawPosOnParabola != null)
-        {
-            for (int i = 0; i < drawPosOnParabola.Length; i++)
-                Gizmos.DrawCube(drawPosOnParabola[i], Vector3.one * 0.5f);
-        }
-
     }
+
+    void DebugDrawParabola(Parabola _parabola)
+    {
+        for (float x = 0; x < 10; x += 0.05f)
+        {
+            Gizmos.DrawLine(Vector3.up * (_parabola.a * x * x + _parabola.b * x + _parabola.c) + _parabola.direction * x + _parabola.origin,
+                Vector3.up * (_parabola.a * (x + 0.05f) * (x + 0.05f) + _parabola.b * (x + 0.05f) + _parabola.c) + _parabola.direction * (x + 0.05f) + _parabola.origin);
+        }
+    }
+
+    void DebugDrawDetectionPoints(Parabola _parabola, GameObject _target)
+    {
+        if (drawDetectionPoints && nbOfPointsForDetection > 0)
+        {
+            Gizmos.color = debugDetectionPoitnsColor;
+            Vector3[] posOnParabola;
+
+            posOnParabola = _parabola.GetNPointsInWorld(_target.transform.position, _target.GetComponent<Collider>().bounds.extents, startCollider.transform.position, nbOfPointsForDetection);
+            for (int i = 0; i < posOnParabola.Length; i++)
+                Gizmos.DrawSphere(posOnParabola[i], 0.25f);
+        }
+    }
+
 }

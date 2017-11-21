@@ -17,6 +17,8 @@ public class LDChecker : MonoBehaviour {
     float maxParabolB;
     Vector2 maxParabolHeight;
 
+    float epsilonDetectionPlatformAbove = 0.1f;
+
     // Debug variables
     [Header("Debug")]
     public bool drawDebugParabolas;
@@ -90,17 +92,40 @@ public class LDChecker : MonoBehaviour {
                 // if collider within range (box jump height/jump range + epsilon)
                 //if (Vector3.Distance(_collider.transform.position, col.transform.position) < testMaxDistance)
                 //{
-                Parabola testParabola = new Parabola(_collider.transform, col.transform);
 
-                Vector3[] posOnParabola = testParabola.GetNPointsInWorld(col.transform.position, col.bounds.extents, _collider.transform.position, 10);
-                
-                if (ThereIsAPointAbove(posOnParabola, col))
+                // If destination is above current and contained in a box
+                if (col.transform.position.x + col.bounds.extents.x + epsilonDetectionPlatformAbove < _collider.transform.position.x + _collider.bounds.extents.x
+                    && col.transform.position.x - col.bounds.extents.x - epsilonDetectionPlatformAbove > _collider.transform.position.x - _collider.bounds.extents.x
+                    && col.transform.position.z + col.bounds.extents.z + epsilonDetectionPlatformAbove < _collider.transform.position.z + _collider.bounds.extents.z
+                    && col.transform.position.z - col.bounds.extents.z - epsilonDetectionPlatformAbove > _collider.transform.position.z - _collider.bounds.extents.z)
                 {
-                    _collider.GetComponent<GizmosDraw>().AddNearPlatformPosition(col.transform);
+                    //if (col.transform.position.y > _collider.transform.position.y)
+                        // ok
+                    //else
+                        // pas ok
                 }
+                // Check if destination is above current, with current smaller
+                else
+                {
+                    // gros if comme au dessus
+                    // else check with parabolas
+                }
+                
             }
         }
 
+    }
+
+     void CheckWithParabola(Collider _origin, Collider _target)
+    {
+        Parabola testParabola = new Parabola(_origin.transform, _target.transform);
+
+        Vector3[] posOnParabola = testParabola.GetNPointsInWorld(_target.transform.position, _target.bounds.extents, _origin.transform.position, 10);
+
+        if (ThereIsAPointAbove(posOnParabola, _target))
+        {
+            _origin.GetComponent<GizmosDraw>().AddNearPlatformPosition(_target.transform);
+        }
     }
 
     List<Parabola> DebugGetParabolasForNearColliders(Collider _startCollider)

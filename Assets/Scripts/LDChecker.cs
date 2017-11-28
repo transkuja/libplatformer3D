@@ -89,8 +89,7 @@ public class LDChecker : MonoBehaviour {
                         if ((col.transform.position.y >= _collider.transform.position.y && CheckPlatformBoundariesAlt(_collider, col))
                             || (col.transform.position.y < _collider.transform.position.y && CheckPlatformBoundariesAlt(col, _collider)))
                         {
-                                 CheckWithParabola(_collider, col);
-    
+                            CheckWithParabola(_collider, col);
                         }
                     }
                 //}

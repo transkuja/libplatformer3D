@@ -76,36 +76,31 @@ public class LDChecker : MonoBehaviour {
             if (col != _collider)
             {
                 // if collider within range (box jump height/jump range + epsilon)
-                //if (Vector3.Distance(_collider.transform.position, col.transform.position) < testMaxDistance)
-                //{
-
-                if ((col.transform.position.y >= _collider.transform.position.y && CheckPlatformBoundaries(_collider, col))
-                    || (col.transform.position.y < _collider.transform.position.y && CheckPlatformBoundaries(col, _collider)))
+                if (Vector3.Distance(_collider.transform.position, col.transform.position) < testMaxDistance)
                 {
-                    if (col.transform.position.y - _collider.transform.position.y < jumpHeight)
+                    if ((col.transform.position.y >= _collider.transform.position.y && CheckPlatformBoundaries(_collider, col))
+                        || (col.transform.position.y < _collider.transform.position.y && CheckPlatformBoundaries(col, _collider)))
                     {
-                        _collider.GetComponent<GizmosDraw>().AddNearPlatformPosition(col.transform);
-                        if (_collider.name == "Platform (10)" && col.name == "Platform (9)") Debug.Log("1");
+                        if (col.transform.position.y - _collider.transform.position.y < jumpHeight)
+                        {
+                            _collider.GetComponent<GizmosDraw>().AddNearPlatformPosition(col.transform);
+                            if (_collider.name == "Platform (10)" && col.name == "Platform (9)") Debug.Log("1");
 
+                        }
+                        else
+                            if (_collider.name == "Platform (10)" && col.name == "Platform (9)") Debug.Log("2");
                     }
                     else
-                        if (_collider.name == "Platform (10)" && col.name == "Platform (9)") Debug.Log("2");
-                }
-                else
-                {
-                    if ((col.transform.position.y >= _collider.transform.position.y && CheckPlatformBoundariesAlt(_collider, col))
-                        || (col.transform.position.y < _collider.transform.position.y && CheckPlatformBoundariesAlt(col, _collider)))
                     {
-                        if (_collider.name == "Platform (10)" && col.name == "Platform (9)") Debug.Log("3");
-                        CheckWithParabola(_collider, col);
+                        if ((col.transform.position.y >= _collider.transform.position.y && CheckPlatformBoundariesAlt(_collider, col))
+                            || (col.transform.position.y < _collider.transform.position.y && CheckPlatformBoundariesAlt(col, _collider)))
+                        {
+                            if (_collider.name == "Platform (10)" && col.name == "Platform (9)") Debug.Log("3");
+                            CheckWithParabola(_collider, col);
+                        }
+                        if (_collider.name == "Platform (10)" && col.name == "Platform (9)") Debug.Log("4");
                     }
-                    if (_collider.name == "Platform (10)" && col.name == "Platform (9)") Debug.Log("4");
                 }
-                // Check if destination is above current, with current smaller
-                //else
-                //{
-                //    CheckWithParabola(_collider, col);
-                //}
 
             }
         }
@@ -120,17 +115,9 @@ public class LDChecker : MonoBehaviour {
         bool minBoundZ = _target.transform.position.z - _target.bounds.extents.z - epsilonDetectionPlatformAbove > _origin.transform.position.z - _origin.bounds.extents.z;
 
         return ((maxBoundX && minBoundX) || (maxBoundZ && minBoundZ));
-        //if (maxBoundX && _target.transform.position.x + _target.bounds.extents.x + epsilonDetectionPlatformAbove - _origin.transform.position.x - _origin.bounds.extents.x  || minBoundX || maxBoundZ || minBoundZ)
-        
-        //if (((maxBoundX && minBoundX) || (maxBoundX && minBoundX)) == false)
-        //    return false;
-
-        //return (_target.transform.position.x + _target.bounds.extents.x + epsilonDetectionPlatformAbove < _origin.transform.position.x + _origin.bounds.extents.x
-        //                && _target.transform.position.x - _target.bounds.extents.x - epsilonDetectionPlatformAbove > _origin.transform.position.x - _origin.bounds.extents.x)
-        //                || ( _target.transform.position.z + _target.bounds.extents.z + epsilonDetectionPlatformAbove < _origin.transform.position.z + _origin.bounds.extents.z
-        //                && _target.transform.position.z - _target.bounds.extents.z - epsilonDetectionPlatformAbove > _origin.transform.position.z - _origin.bounds.extents.z);
     }
 
+    // TODO: rename this
     bool CheckPlatformBoundariesAlt(Collider _origin, Collider _target)
     {
         bool maxBoundX = _target.transform.position.x + _target.bounds.extents.x + epsilonDetectionPlatformAbove < _origin.transform.position.x + _origin.bounds.extents.x;
@@ -138,13 +125,6 @@ public class LDChecker : MonoBehaviour {
         bool maxBoundZ = _target.transform.position.z + _target.bounds.extents.z + epsilonDetectionPlatformAbove < _origin.transform.position.z + _origin.bounds.extents.z;
         bool minBoundZ = _target.transform.position.z - _target.bounds.extents.z - epsilonDetectionPlatformAbove > _origin.transform.position.z - _origin.bounds.extents.z;
 
-        //if (!maxBoundX && !minBoundX && !maxBoundZ && !minBoundZ) return false;
-        ////if (maxBoundX && _target.transform.position.x + _target.bounds.extents.x + epsilonDetectionPlatformAbove - _origin.transform.position.x - _origin.bounds.extents.x  || minBoundX || maxBoundZ || minBoundZ)
-
-        ////if (((maxBoundX && minBoundX) || (maxBoundX && minBoundX)) == false)
-        ////    return false;
-
-        //return true;
         return ((maxBoundX || minBoundX || maxBoundZ || minBoundZ) && (!maxBoundX || !minBoundX || !maxBoundZ || !minBoundZ)) 
             || (maxBoundX && minBoundX && maxBoundZ && minBoundZ);
     }

@@ -13,11 +13,7 @@ public class LDChecker : MonoBehaviour {
     public float gravity;
     float jumpRangeEpsilon;
 
-    public float maxParabolA;
-    float maxParabolB;
-    Vector2 maxParabolHeight;
-
-    float epsilonDetectionPlatformAbove = 0.1f;
+    float epsilonDetectionPlatformAbove = 0.01f;
 
     // Debug variables
     [Header("Debug")]
@@ -34,7 +30,6 @@ public class LDChecker : MonoBehaviour {
     {
         instance = this;
         testMaxDistance = Mathf.Sqrt(jumpHeight * jumpHeight + (jumpRange + Mathf.Log(gravity)) * (jumpRange + Mathf.Log(gravity)));
-        ComputeMaxParabol();
         LoadColliders();
         foreach (Collider col in colliders)
             CheckAccessibility(col);
@@ -57,15 +52,6 @@ public class LDChecker : MonoBehaviour {
 
         private set { }
     }
-
-
-    void ComputeMaxParabol()
-    {
-        maxParabolHeight = new Vector2(jumpRange / 2.0f, jumpHeight);
-        maxParabolA = -gravity;
-        maxParabolB = 2 * maxParabolA * maxParabolHeight.y;
-    }
-
 
     void LoadColliders()
     {
@@ -93,30 +79,77 @@ public class LDChecker : MonoBehaviour {
                 //if (Vector3.Distance(_collider.transform.position, col.transform.position) < testMaxDistance)
                 //{
 
-                // If destination is above current and contained in a box
-                if (col.transform.position.x + col.bounds.extents.x + epsilonDetectionPlatformAbove < _collider.transform.position.x + _collider.bounds.extents.x
-                    && col.transform.position.x - col.bounds.extents.x - epsilonDetectionPlatformAbove > _collider.transform.position.x - _collider.bounds.extents.x
-                    && col.transform.position.z + col.bounds.extents.z + epsilonDetectionPlatformAbove < _collider.transform.position.z + _collider.bounds.extents.z
-                    && col.transform.position.z - col.bounds.extents.z - epsilonDetectionPlatformAbove > _collider.transform.position.z - _collider.bounds.extents.z)
+                if ((col.transform.position.y >= _collider.transform.position.y && CheckPlatformBoundaries(_collider, col))
+                    || (col.transform.position.y < _collider.transform.position.y && CheckPlatformBoundaries(col, _collider)))
                 {
-                    //if (col.transform.position.y > _collider.transform.position.y)
-                        // ok
-                    //else
-                        // pas ok
+                    if (col.transform.position.y - _collider.transform.position.y < jumpHeight)
+                    {
+                        _collider.GetComponent<GizmosDraw>().AddNearPlatformPosition(col.transform);
+                        if (_collider.name == "Platform (10)" && col.name == "Platform (9)") Debug.Log("1");
+
+                    }
+                    else
+                        if (_collider.name == "Platform (10)" && col.name == "Platform (9)") Debug.Log("2");
                 }
-                // Check if destination is above current, with current smaller
                 else
                 {
-                    // gros if comme au dessus
-                    // else check with parabolas
+                    if ((col.transform.position.y >= _collider.transform.position.y && CheckPlatformBoundariesAlt(_collider, col))
+                        || (col.transform.position.y < _collider.transform.position.y && CheckPlatformBoundariesAlt(col, _collider)))
+                    {
+                        if (_collider.name == "Platform (10)" && col.name == "Platform (9)") Debug.Log("3");
+                        CheckWithParabola(_collider, col);
+                    }
+                    if (_collider.name == "Platform (10)" && col.name == "Platform (9)") Debug.Log("4");
                 }
-                
+                // Check if destination is above current, with current smaller
+                //else
+                //{
+                //    CheckWithParabola(_collider, col);
+                //}
+
             }
         }
 
     }
 
-     void CheckWithParabola(Collider _origin, Collider _target)
+    bool CheckPlatformBoundaries(Collider _origin, Collider _target)
+    {
+        bool maxBoundX = _target.transform.position.x + _target.bounds.extents.x + epsilonDetectionPlatformAbove < _origin.transform.position.x + _origin.bounds.extents.x;
+        bool minBoundX = _target.transform.position.x - _target.bounds.extents.x - epsilonDetectionPlatformAbove > _origin.transform.position.x - _origin.bounds.extents.x;
+        bool maxBoundZ = _target.transform.position.z + _target.bounds.extents.z + epsilonDetectionPlatformAbove < _origin.transform.position.z + _origin.bounds.extents.z;
+        bool minBoundZ = _target.transform.position.z - _target.bounds.extents.z - epsilonDetectionPlatformAbove > _origin.transform.position.z - _origin.bounds.extents.z;
+
+        return ((maxBoundX && minBoundX) || (maxBoundZ && minBoundZ));
+        //if (maxBoundX && _target.transform.position.x + _target.bounds.extents.x + epsilonDetectionPlatformAbove - _origin.transform.position.x - _origin.bounds.extents.x  || minBoundX || maxBoundZ || minBoundZ)
+        
+        //if (((maxBoundX && minBoundX) || (maxBoundX && minBoundX)) == false)
+        //    return false;
+
+        //return (_target.transform.position.x + _target.bounds.extents.x + epsilonDetectionPlatformAbove < _origin.transform.position.x + _origin.bounds.extents.x
+        //                && _target.transform.position.x - _target.bounds.extents.x - epsilonDetectionPlatformAbove > _origin.transform.position.x - _origin.bounds.extents.x)
+        //                || ( _target.transform.position.z + _target.bounds.extents.z + epsilonDetectionPlatformAbove < _origin.transform.position.z + _origin.bounds.extents.z
+        //                && _target.transform.position.z - _target.bounds.extents.z - epsilonDetectionPlatformAbove > _origin.transform.position.z - _origin.bounds.extents.z);
+    }
+
+    bool CheckPlatformBoundariesAlt(Collider _origin, Collider _target)
+    {
+        bool maxBoundX = _target.transform.position.x + _target.bounds.extents.x + epsilonDetectionPlatformAbove < _origin.transform.position.x + _origin.bounds.extents.x;
+        bool minBoundX = _target.transform.position.x - _target.bounds.extents.x - epsilonDetectionPlatformAbove > _origin.transform.position.x - _origin.bounds.extents.x;
+        bool maxBoundZ = _target.transform.position.z + _target.bounds.extents.z + epsilonDetectionPlatformAbove < _origin.transform.position.z + _origin.bounds.extents.z;
+        bool minBoundZ = _target.transform.position.z - _target.bounds.extents.z - epsilonDetectionPlatformAbove > _origin.transform.position.z - _origin.bounds.extents.z;
+
+        //if (!maxBoundX && !minBoundX && !maxBoundZ && !minBoundZ) return false;
+        ////if (maxBoundX && _target.transform.position.x + _target.bounds.extents.x + epsilonDetectionPlatformAbove - _origin.transform.position.x - _origin.bounds.extents.x  || minBoundX || maxBoundZ || minBoundZ)
+
+        ////if (((maxBoundX && minBoundX) || (maxBoundX && minBoundX)) == false)
+        ////    return false;
+
+        //return true;
+        return ((maxBoundX || minBoundX || maxBoundZ || minBoundZ) && (!maxBoundX || !minBoundX || !maxBoundZ || !minBoundZ)) 
+            || (maxBoundX && minBoundX && maxBoundZ && minBoundZ);
+    }
+
+    void CheckWithParabola(Collider _origin, Collider _target)
     {
         Parabola testParabola = new Parabola(_origin.transform, _target.transform);
 

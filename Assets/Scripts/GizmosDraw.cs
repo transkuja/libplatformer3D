@@ -18,6 +18,8 @@ public class Parabola
         float yS = LDChecker.Instance.jumpHeight;
 
         a = yS / (x1 * x2 - Mathf.Pow(xS, 2));
+        if (a > 0) a = -a;
+
         b = -2 * a * xS;
         c = a * x1 * x2;
     }
@@ -32,6 +34,7 @@ public class Parabola
             Vector3.Dot(currentCollider.position + _direction * LDChecker.Instance.jumpRange, _direction));
 
         a = tmp.a; b = tmp.b; c = tmp.c;
+
         direction = _direction;
         origin = currentCollider.position;
     }

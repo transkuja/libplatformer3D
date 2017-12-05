@@ -79,21 +79,19 @@ public class LDChecker : MonoBehaviour {
         {
             if (target != _jumpOrigin)
             {
-                // if collider within range (box jump height/jump range + epsilon)
-                if (LogicalCheck(_jumpOrigin, target))
+                if (ObviousChecks(_jumpOrigin, target))
                 {
-                    if ((target.transform.position.y >= _jumpOrigin.transform.position.y && CheckPlatformBoundaries(_jumpOrigin, target))
-                        || (target.transform.position.y < _jumpOrigin.transform.position.y && CheckPlatformBoundaries(target, _jumpOrigin)))
+                    if ((target.transform.position.y >= _jumpOrigin.transform.position.y && IsOriginWiderOnXOrZAxis(_jumpOrigin, target))
+                        || (target.transform.position.y < _jumpOrigin.transform.position.y && IsOriginWiderOnXOrZAxis(target, _jumpOrigin)))
                     {
-                        if (target.transform.position.y - _jumpOrigin.transform.position.y < jumpHeight)
-                            _jumpOrigin.GetComponent<GizmosDraw>().AddNearPlatformPosition(target.transform);
+                        _jumpOrigin.GetComponent<GizmosDraw>().AddNearPlatformPosition(target.transform);
                     }
                     else
                     {
-                        if ((target.transform.position.y >= _jumpOrigin.transform.position.y && CheckPlatformBoundariesAlt(_jumpOrigin, target))
-                            || (target.transform.position.y < _jumpOrigin.transform.position.y && CheckPlatformBoundariesAlt(target, _jumpOrigin)))
+                        if ((target.transform.position.y >= _jumpOrigin.transform.position.y && IsTargetPlatformExceedingOnASide(_jumpOrigin, target))
+                            || (target.transform.position.y < _jumpOrigin.transform.position.y && IsTargetPlatformExceedingOnASide(target, _jumpOrigin)))
                         {
-                            CheckWithParabola(_jumpOrigin, target);
+                            CheckAccessibilityWithParabola(_jumpOrigin, target);
                         }
                     }
                 }
@@ -103,11 +101,14 @@ public class LDChecker : MonoBehaviour {
 
     }
     
-    bool LogicalCheck(Collider _origin, Collider _target)
+    // Avoid drawing unnecessary parabolas
+    bool ObviousChecks(Collider _origin, Collider _target)
     {
+        // Height check
         if (_target.transform.position.y - _origin.transform.position.y > jumpHeight)
             return false;
 
+        // Range check
         Vector3 originPositionXZ = new Vector3(_origin.transform.position.x, 0, _origin.transform.position.z);
         Vector3 targetPositionXZ = new Vector3(_target.transform.position.x, 0, _target.transform.position.z);
         if (Vector3.Distance(originPositionXZ, targetPositionXZ) > 1.5*jumpRange)
@@ -116,7 +117,8 @@ public class LDChecker : MonoBehaviour {
         return true;
     }
 
-    bool CheckPlatformBoundaries(Collider _origin, Collider _target)
+    // Check if _target is smaller on x or z than _origin 
+    bool IsOriginWiderOnXOrZAxis(Collider _origin, Collider _target)
     {
         bool maxBoundX = _target.transform.position.x + _target.bounds.extents.x + epsilonDetectionPlatformAbove < _origin.transform.position.x + _origin.bounds.extents.x;
         bool minBoundX = _target.transform.position.x - _target.bounds.extents.x - epsilonDetectionPlatformAbove > _origin.transform.position.x - _origin.bounds.extents.x;
@@ -126,28 +128,19 @@ public class LDChecker : MonoBehaviour {
         return ((maxBoundX && minBoundX) || (maxBoundZ && minBoundZ));
     }
 
-    // TODO: rename this
-    bool CheckPlatformBoundariesAlt(Collider _origin, Collider _target)
+    // Check if _target has at least one side larger than _origin
+    bool IsTargetPlatformExceedingOnASide(Collider _origin, Collider _target)
     {
         bool maxBoundX = _target.transform.position.x + _target.bounds.extents.x + epsilonDetectionPlatformAbove < _origin.transform.position.x + _origin.bounds.extents.x;
         bool minBoundX = _target.transform.position.x - _target.bounds.extents.x - epsilonDetectionPlatformAbove > _origin.transform.position.x - _origin.bounds.extents.x;
         bool maxBoundZ = _target.transform.position.z + _target.bounds.extents.z + epsilonDetectionPlatformAbove < _origin.transform.position.z + _origin.bounds.extents.z;
         bool minBoundZ = _target.transform.position.z - _target.bounds.extents.z - epsilonDetectionPlatformAbove > _origin.transform.position.z - _origin.bounds.extents.z;
 
-        return ((maxBoundX || minBoundX || maxBoundZ || minBoundZ) && (!maxBoundX || !minBoundX || !maxBoundZ || !minBoundZ));
+        return ((maxBoundX || minBoundX || maxBoundZ || minBoundZ) && (!maxBoundX || !minBoundX || !maxBoundZ || !minBoundZ)) || (maxBoundX && minBoundX && maxBoundZ && minBoundZ);
     }
 
-    bool CheckPlatformBoundariesAltAlwaysMoreUgly(Collider _origin, Collider _target)
-    {
-        bool maxBoundX = _target.transform.position.x + _target.bounds.extents.x + epsilonDetectionPlatformAbove < _origin.transform.position.x + _origin.bounds.extents.x;
-        bool minBoundX = _target.transform.position.x - _target.bounds.extents.x - epsilonDetectionPlatformAbove > _origin.transform.position.x - _origin.bounds.extents.x;
-        bool maxBoundZ = _target.transform.position.z + _target.bounds.extents.z + epsilonDetectionPlatformAbove < _origin.transform.position.z + _origin.bounds.extents.z;
-        bool minBoundZ = _target.transform.position.z - _target.bounds.extents.z - epsilonDetectionPlatformAbove > _origin.transform.position.z - _origin.bounds.extents.z;
-
-        return ((maxBoundX && minBoundX && maxBoundZ && minBoundZ));
-    }
-
-    void CheckWithParabola(Collider _origin, Collider _target)
+    // Compute a jump parabola to check if _target is reachable from _origin
+    void CheckAccessibilityWithParabola(Collider _origin, Collider _target)
     {
         Parabola testParabola = new Parabola(_origin.transform, _target.transform);
 
@@ -259,6 +252,7 @@ public class LDChecker : MonoBehaviour {
 
     private void Update()
     {
+        // Helper
         if (exchangeStartAndTarget)
         {
             GameObject tmp = startCollider;

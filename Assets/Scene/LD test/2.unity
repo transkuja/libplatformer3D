@@ -380,16 +380,31 @@ Prefab:
     - target: {fileID: 114762995552550610, guid: 60a7a10f4e506a046b504d03bfdcaff8,
         type: 2}
       propertyPath: jumpHeight
-      value: 10
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 114762995552550610, guid: 60a7a10f4e506a046b504d03bfdcaff8,
         type: 2}
       propertyPath: jumpRange
       value: 5
       objectReference: {fileID: 0}
+    - target: {fileID: 114762995552550610, guid: 60a7a10f4e506a046b504d03bfdcaff8,
+        type: 2}
+      propertyPath: startCollider
+      value: 
+      objectReference: {fileID: 1922377694}
+    - target: {fileID: 114762995552550610, guid: 60a7a10f4e506a046b504d03bfdcaff8,
+        type: 2}
+      propertyPath: targetCollider
+      value: 
+      objectReference: {fileID: 781322142}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 60a7a10f4e506a046b504d03bfdcaff8, type: 2}
   m_IsPrefabParent: 0
+--- !u!1 &781322142 stripped
+GameObject:
+  m_PrefabParentObject: {fileID: 1201945145491012, guid: 7b47522acbbab4249b7834afa623c490,
+    type: 2}
+  m_PrefabInternal: {fileID: 198750379}
 --- !u!1001 &831817022
 Prefab:
   m_ObjectHideFlags: 0
@@ -920,6 +935,11 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
+--- !u!1 &1922377694 stripped
+GameObject:
+  m_PrefabParentObject: {fileID: 1201945145491012, guid: 7b47522acbbab4249b7834afa623c490,
+    type: 2}
+  m_PrefabInternal: {fileID: 831817022}
 --- !u!1001 &1953562596
 Prefab:
   m_ObjectHideFlags: 0

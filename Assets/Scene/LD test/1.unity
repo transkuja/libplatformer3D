@@ -452,6 +452,11 @@ Prefab:
       propertyPath: targetCollider
       value: 
       objectReference: {fileID: 987237655}
+    - target: {fileID: 114762995552550610, guid: 60a7a10f4e506a046b504d03bfdcaff8,
+        type: 2}
+      propertyPath: jumpRange
+      value: 5
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 60a7a10f4e506a046b504d03bfdcaff8, type: 2}
   m_IsPrefabParent: 0

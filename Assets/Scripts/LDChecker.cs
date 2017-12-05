@@ -21,6 +21,7 @@ public class LDChecker : MonoBehaviour {
     public Color debugParabolasColor = Color.magenta;
     public GameObject startCollider;
     public GameObject targetCollider;
+    public bool exchangeStartAndTarget = false;
     public bool drawDetectionPoints;
     public Color debugDetectionPoitnsColor = Color.magenta;
     public int nbOfPointsForDetection;
@@ -253,6 +254,17 @@ public class LDChecker : MonoBehaviour {
             posOnParabola = _parabola.GetNPointsInWorld(_target.transform.position, _target.GetComponent<Collider>().bounds.extents, startCollider.transform.position, nbOfPointsForDetection);
             for (int i = 0; i < posOnParabola.Length; i++)
                 Gizmos.DrawSphere(posOnParabola[i], 0.25f);
+        }
+    }
+
+    private void Update()
+    {
+        if (exchangeStartAndTarget)
+        {
+            GameObject tmp = startCollider;
+            startCollider = targetCollider;
+            targetCollider = tmp;
+            exchangeStartAndTarget = false;
         }
     }
 

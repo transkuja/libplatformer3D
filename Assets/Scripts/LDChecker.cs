@@ -109,8 +109,9 @@ public class LDChecker : MonoBehaviour {
             return false;
 
         // Range check
+        Vector3 targetClosestPosition = Physics.ClosestPoint(_origin.transform.position, _target, _target.transform.position, _target.transform.rotation);
         Vector3 originPositionXZ = new Vector3(_origin.transform.position.x, 0, _origin.transform.position.z);
-        Vector3 targetPositionXZ = new Vector3(_target.transform.position.x, 0, _target.transform.position.z);
+        Vector3 targetPositionXZ = new Vector3(targetClosestPosition.x, 0, targetClosestPosition.z);
         if (Vector3.Distance(originPositionXZ, targetPositionXZ) > 1.5*jumpRange)
             return false;
 

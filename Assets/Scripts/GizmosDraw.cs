@@ -27,7 +27,17 @@ public class Parabola
 
     public Parabola(Transform currentCollider, Transform targetCollider)
     {
-        Vector3 _direction = targetCollider.position - currentCollider.position;
+        Collider targetColliderComponent = targetCollider.GetComponentInChildren<Collider>();
+        if (targetColliderComponent == null) targetColliderComponent = targetCollider.GetComponentInParent<Collider>();
+        if (targetColliderComponent == null)
+        {
+            Debug.LogWarning("No collider found on " + targetCollider.name);
+            return;
+        }
+
+        Vector3 targetClosestPosition = Physics.ClosestPoint(currentCollider.transform.position, targetColliderComponent, targetCollider.position, targetCollider.rotation);
+
+        Vector3 _direction = targetClosestPosition - currentCollider.position;
         _direction.y = 0.0f;
         _direction.Normalize();
 

@@ -57,7 +57,7 @@ public class GizmosDraw : MonoBehaviour {
 
     void UnshowAccessibility()
     {
-        foreach (Transform platform in nearPlatforms)
+        foreach (Collider platform in LDChecker.Instance.Colliders)
         {
             platform.GetComponentInChildren<MeshRenderer>().material.color = Color.red;
         }

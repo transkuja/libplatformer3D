@@ -58,6 +58,14 @@ public class LDChecker : MonoBehaviour {
         private set { }
     }
 
+    public List<Collider> Colliders
+    {
+        get
+        {
+            return colliders;
+        }
+    }
+
     void LoadColliders()
     {
         Collider[] tmpColliders = FindObjectsOfType<Collider>();

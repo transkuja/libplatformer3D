@@ -31,8 +31,8 @@ public class Parabola
         _direction.y = 0.0f;
         _direction.Normalize();
 
-        Parabola tmp = new Parabola(Vector3.Dot(currentCollider.position, _direction),
-            Vector3.Dot(currentCollider.position + _direction * LDChecker.Instance.jumpRange, _direction));
+        Parabola tmp = new Parabola(0,
+            Vector3.Dot(_direction * LDChecker.Instance.jumpRange, _direction));
 
         a = tmp.a; b = tmp.b; c = tmp.c;
 

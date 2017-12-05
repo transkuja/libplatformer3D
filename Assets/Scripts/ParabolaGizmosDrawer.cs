@@ -1,11 +1,11 @@
 ﻿using UnityEngine;
 using UnityEditor;
 
-public static class ParabolGizmosDrawer
+public static class ParabolaGizmosDrawer
 {
 
     [DrawGizmo(GizmoType.Active | GizmoType.Selected)]
-    static void DrawParabolGizmos(GizmosDraw _from, GizmoType drawnGizmoType)
+    static void DrawParabolaGizmos(GizmosDraw _from, GizmoType drawnGizmoType)
     {
         Gizmos.color = Color.red;
         _from.ShowAccessiblePlatformsFromHere();

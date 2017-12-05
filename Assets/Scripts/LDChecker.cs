@@ -9,7 +9,6 @@ public class LDChecker : MonoBehaviour {
 
     public float jumpHeight;
     public float jumpRange;
-    public float testMaxDistance;
     public float gravity;
     float jumpRangeEpsilon;
 
@@ -33,12 +32,14 @@ public class LDChecker : MonoBehaviour {
     void Start()
     {
         instance = this;
-        testMaxDistance = Mathf.Sqrt(jumpHeight * jumpHeight + (jumpRange + Mathf.Log(gravity)) * (jumpRange + Mathf.Log(gravity)));
         LoadColliders();
         foreach (Collider col in colliders)
             CheckAccessibility(col);
         foreach (Collider col in colliders)
-            ShowAccessibility(col);
+        {
+            if (col.GetComponent<GizmosDraw>() != null)
+                col.GetComponent<GizmosDraw>().ShowAccessibilityFromThis();
+        }
 
     }
 
@@ -153,6 +154,20 @@ public class LDChecker : MonoBehaviour {
         }
     }
 
+    // Check if there's a point above current collider on the parabola
+    bool ThereIsAPointAbove(Vector3[] posOnParabola, Collider _currentCollider)
+    {
+        for (int i = 0; i < posOnParabola.Length; i++)
+        {
+            if (posOnParabola[i].y > _currentCollider.transform.position.y + _currentCollider.bounds.extents.y)
+                return true;
+        }
+
+        return false;
+    }
+
+    #region Helper
+
     List<Parabola> DebugGetParabolasForNearColliders(Collider _startCollider)
     {
         List<Parabola> result = new List<Parabola>();
@@ -168,33 +183,6 @@ public class LDChecker : MonoBehaviour {
         }
 
         return result;
-    }
-
-    bool ThereIsAPointAbove(Vector3[] posOnParabola, Collider _currentCollider)
-    {
-        for (int i = 0; i < posOnParabola.Length; i++)
-        {
-            if (posOnParabola[i].y > _currentCollider.transform.position.y + _currentCollider.bounds.extents.y)
-                return true;
-        }
-
-        return false;
-    }
-
-    void ShowAccessibility(Collider _collider)
-    {
-        if (_collider.GetComponent<GizmosDraw>().isAccessible)
-            _collider.GetComponentInChildren<MeshRenderer>().material.color = Color.green;
-        else
-            _collider.GetComponentInChildren<MeshRenderer>().material.color = Color.red;
-    }
-
-    public void UnshowAccessibility()
-    {
-        foreach (Collider col in colliders)
-        {
-            col.GetComponentInChildren<MeshRenderer>().material.color = Color.red;
-        }
     }
 
     private void OnDrawGizmos()
@@ -260,4 +248,5 @@ public class LDChecker : MonoBehaviour {
         }
     }
 
+    #endregion
 }

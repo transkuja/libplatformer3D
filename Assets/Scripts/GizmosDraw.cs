@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class GizmosDraw : MonoBehaviour {
-    private List<Vector3> directions;
-    private List<Transform> nearPlatformPositions;
+    private List<Transform> nearPlatforms;
     private List<Parabola> parabolas;
 
     public bool drawn = false;
@@ -22,46 +21,14 @@ public class GizmosDraw : MonoBehaviour {
         }
     }
 
-    public List<Vector3> Directions
-    {
-        get
-        {
-            if (directions == null)
-                directions = new List<Vector3>();
-
-            return directions;
-        }
-    }
-
     public List<Transform> NearPlatformPositions
     {
         get
         {
-            if (nearPlatformPositions == null)
-                nearPlatformPositions = new List<Transform>();
+            if (nearPlatforms == null)
+                nearPlatforms = new List<Transform>();
 
-            return nearPlatformPositions;
-        }
-    }
-
-    public void AddNearPlatformPosition(Transform _nearTransform)
-    {
-        NearPlatformPositions.Add(_nearTransform);
-        _nearTransform.GetComponent<GizmosDraw>().isAccessible = true;
-        AreAccessibleFromThis.Add(_nearTransform.GetComponent<GizmosDraw>());
-    }
-
-    public void ShowAccessiblePlatformsFromHere()
-    {
-        LDChecker.Instance.UnshowAccessibility();
-        GetComponentInChildren<MeshRenderer>().material.color = Color.yellow;
-
-        if (areAccessibleFromThis == null)
-            return;
-
-        foreach (GizmosDraw gd in areAccessibleFromThis)
-        {
-            gd.GetComponentInChildren<MeshRenderer>().material.color = Color.green;
+            return nearPlatforms;
         }
     }
 
@@ -80,14 +47,49 @@ public class GizmosDraw : MonoBehaviour {
         }
     }
 
+    public void ShowAccessibilityFromThis()
+    {
+        if (isAccessible)
+            GetComponentInChildren<MeshRenderer>().material.color = Color.green;
+        else
+            GetComponentInChildren<MeshRenderer>().material.color = Color.red;
+    }
+
+    void UnshowAccessibility()
+    {
+        foreach (Transform platform in nearPlatforms)
+        {
+            platform.GetComponentInChildren<MeshRenderer>().material.color = Color.red;
+        }
+    }
+
+    public void AddNearPlatformPosition(Transform _nearTransform)
+    {
+        NearPlatformPositions.Add(_nearTransform);
+        _nearTransform.GetComponent<GizmosDraw>().isAccessible = true;
+        AreAccessibleFromThis.Add(_nearTransform.GetComponent<GizmosDraw>());
+    }
+
+    public void ShowAccessiblePlatformsFromHere()
+    {
+        UnshowAccessibility();
+        GetComponentInChildren<MeshRenderer>().material.color = Color.yellow;
+
+        if (areAccessibleFromThis == null)
+            return;
+
+        foreach (GizmosDraw gd in areAccessibleFromThis)
+        {
+            gd.GetComponentInChildren<MeshRenderer>().material.color = Color.green;
+        }
+    }
+
     void ComputeParabolas()
     {
         parabolas = new List<Parabola>();
 
-        for (int i = 0; i < nearPlatformPositions.Count; i++)
-        {
-            parabolas.Add(new Parabola(transform, nearPlatformPositions[i]));
-        }
+        for (int i = 0; i < nearPlatforms.Count; i++)
+            parabolas.Add(new Parabola(transform, nearPlatforms[i]));
     }
 
 }

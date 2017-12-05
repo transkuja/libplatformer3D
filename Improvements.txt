@@ -1,2 +1,4 @@
 - Parabola from the edge
-
+- Calculer la direction en fonction de la position la plus proche
+- Pb avec les rotations?
+- Tracé de chemin d'un point A à B s'il est possible

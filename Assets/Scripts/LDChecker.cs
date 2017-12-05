@@ -231,11 +231,8 @@ public class LDChecker : MonoBehaviour {
         {
             _parabola = drawParabola;
         }
-            for (float x = -2; x < 10; x += 0.05f)
-            {
-                Gizmos.DrawLine(Vector3.up * (_parabola.a * x * x + _parabola.b * x + _parabola.c) + _parabola.direction * x + _parabola.origin,
-                    Vector3.up * (_parabola.a * (x + 0.05f) * (x + 0.05f) + _parabola.b * (x + 0.05f) + _parabola.c) + _parabola.direction * (x + 0.05f) + _parabola.origin);
-            }
+
+        _parabola.Draw();
     }
 
     void DebugDrawDetectionPoints(Parabola _parabola, GameObject _target)

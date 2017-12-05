@@ -35,9 +35,18 @@ public class Parabola
             return;
         }
 
-        Vector3 targetClosestPosition = Physics.ClosestPoint(currentCollider.transform.position, targetColliderComponent, targetCollider.position, targetCollider.rotation);
+        Collider currentColliderComponent = currentCollider.GetComponentInChildren<Collider>();
+        if (currentColliderComponent == null) currentColliderComponent = currentCollider.GetComponentInParent<Collider>();
+        if (currentColliderComponent == null)
+        {
+            Debug.LogWarning("No collider found on " + currentCollider.name);
+            return;
+        }
 
-        Vector3 _direction = targetClosestPosition - currentCollider.position;
+        Vector3 targetClosestPosition = Physics.ClosestPoint(currentCollider.transform.position, targetColliderComponent, targetCollider.position, targetCollider.rotation);
+        Vector3 originClosestPosition = Physics.ClosestPoint(targetClosestPosition, currentColliderComponent, currentCollider.position, currentCollider.rotation);
+
+        Vector3 _direction = targetClosestPosition - originClosestPosition;
         _direction.y = 0.0f;
         _direction.Normalize();
 
@@ -47,7 +56,7 @@ public class Parabola
         a = tmp.a; b = tmp.b; c = tmp.c;
 
         direction = _direction;
-        origin = currentCollider.position;
+        origin = new Vector3(originClosestPosition.x, currentCollider.position.y + currentColliderComponent.bounds.extents.y, originClosestPosition.z);
     }
 
     public float GetY(float x)
@@ -79,11 +88,20 @@ public class Parabola
 
         return result;
     }
+
+    public void Draw(float step = 0.05f, float fromX = -0.5f, float toX = 10)
+    {
+        for (float x = fromX; x < toX; x += step)
+        {
+            Gizmos.DrawLine(Vector3.up * (a * x * x + b * x + c) + direction * x + origin,
+                Vector3.up * (a * (x + step) * (x + step) + b * (x + step) + c) + direction * (x + step) + origin);
+        }
+    }
 }
 
 public class GizmosDraw : MonoBehaviour {
     private List<Vector3> directions;
-    private List<Vector3> nearPlatformPositions;
+    private List<Transform> nearPlatformPositions;
     private List<Parabola> parabolas;
 
     public bool drawn = false;
@@ -112,12 +130,12 @@ public class GizmosDraw : MonoBehaviour {
         }
     }
 
-    public List<Vector3> NearPlatformPositions
+    public List<Transform> NearPlatformPositions
     {
         get
         {
             if (nearPlatformPositions == null)
-                nearPlatformPositions = new List<Vector3>();
+                nearPlatformPositions = new List<Transform>();
 
             return nearPlatformPositions;
         }
@@ -125,7 +143,7 @@ public class GizmosDraw : MonoBehaviour {
 
     public void AddNearPlatformPosition(Transform _nearTransform)
     {
-        NearPlatformPositions.Add(_nearTransform.position);
+        NearPlatformPositions.Add(_nearTransform);
         _nearTransform.GetComponent<GizmosDraw>().isAccessible = true;
         AreAccessibleFromThis.Add(_nearTransform.GetComponent<GizmosDraw>());
     }
@@ -159,35 +177,13 @@ public class GizmosDraw : MonoBehaviour {
         }
     }
 
-    void ComputeDirections()
-    {
-        directions = new List<Vector3>();
-        if (NearPlatformPositions.Count == 0)
-            return;
-
-        foreach (Vector3 position in nearPlatformPositions)
-        {
-            Vector3 direction = position - transform.position;
-            direction.y = 0.0f;
-
-            Directions.Add(direction.normalized);
-
-        }
-
-    }
-
     void ComputeParabolas()
     {
         parabolas = new List<Parabola>();
-        ComputeDirections();
-        if (Directions.Count == 0)
-            return;
 
-        for (int i = 0; i < directions.Count; i++)
+        for (int i = 0; i < nearPlatformPositions.Count; i++)
         {
-            float x1 = Vector3.Dot(transform.position, directions[i]);
-            float x2 = Vector3.Dot(transform.position + directions[i]*LDChecker.Instance.jumpRange, directions[i]);
-            parabolas.Add(new Parabola(x1, x2));
+            parabolas.Add(new Parabola(transform, nearPlatformPositions[i]));
         }
     }
 

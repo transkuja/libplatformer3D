@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 
 // Defines a parabola based on aX² + bX + c formula
+[System.Serializable]
 public class Parabola
-{
+{ 
     public float a;
     public float b;
     public float c;
@@ -18,10 +19,10 @@ public class Parabola
         float yS = LDChecker.Instance.jumpHeight;
 
         a = yS / (x1 * x2 - Mathf.Pow(xS, 2));
-        if (a > 0) a = -a;
 
         b = -2 * a * xS;
         c = a * x1 * x2;
+        if (a > 0) a = -a;
     }
 
     public Parabola(Transform currentCollider, Transform targetCollider)

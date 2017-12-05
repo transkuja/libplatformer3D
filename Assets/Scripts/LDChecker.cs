@@ -26,6 +26,9 @@ public class LDChecker : MonoBehaviour {
     public int nbOfPointsForDetection;
     private List<Collider> debugDrawTargets;
     
+    public Parabola drawParabola;
+    public bool refreshDraw = true;
+
     void Start()
     {
         instance = this;
@@ -69,34 +72,47 @@ public class LDChecker : MonoBehaviour {
         
     }
 
-    void CheckAccessibility(Collider _collider)
+    void CheckAccessibility(Collider _jumpOrigin)
     {
-        foreach (Collider col in colliders)
+        foreach (Collider target in colliders)
         {
-            if (col != _collider)
+            if (target != _jumpOrigin)
             {
                 // if collider within range (box jump height/jump range + epsilon)
-                //if (Vector3.Distance(_collider.transform.position, col.transform.position) < testMaxDistance)
-                //{
-                    if ((col.transform.position.y >= _collider.transform.position.y && CheckPlatformBoundaries(_collider, col))
-                        || (col.transform.position.y < _collider.transform.position.y && CheckPlatformBoundaries(col, _collider)))
+                if (LogicalCheck(_jumpOrigin, target))
+                {
+                    if ((target.transform.position.y >= _jumpOrigin.transform.position.y && CheckPlatformBoundaries(_jumpOrigin, target))
+                        || (target.transform.position.y < _jumpOrigin.transform.position.y && CheckPlatformBoundaries(target, _jumpOrigin)))
                     {
-                        if (col.transform.position.y - _collider.transform.position.y < jumpHeight)
-                            _collider.GetComponent<GizmosDraw>().AddNearPlatformPosition(col.transform);
+                        if (target.transform.position.y - _jumpOrigin.transform.position.y < jumpHeight)
+                            _jumpOrigin.GetComponent<GizmosDraw>().AddNearPlatformPosition(target.transform);
                     }
                     else
                     {
-                        if ((col.transform.position.y >= _collider.transform.position.y && CheckPlatformBoundariesAlt(_collider, col))
-                            || (col.transform.position.y < _collider.transform.position.y && CheckPlatformBoundariesAlt(col, _collider)))
+                        if ((target.transform.position.y >= _jumpOrigin.transform.position.y && CheckPlatformBoundariesAlt(_jumpOrigin, target))
+                            || (target.transform.position.y < _jumpOrigin.transform.position.y && CheckPlatformBoundariesAlt(target, _jumpOrigin)))
                         {
-                            CheckWithParabola(_collider, col);
+                            CheckWithParabola(_jumpOrigin, target);
                         }
                     }
-                //}
+                }
 
             }
         }
 
+    }
+    
+    bool LogicalCheck(Collider _origin, Collider _target)
+    {
+        if (_target.transform.position.y - _origin.transform.position.y > jumpHeight)
+            return false;
+
+        Vector3 originPositionXZ = new Vector3(_origin.transform.position.x, 0, _origin.transform.position.z);
+        Vector3 targetPositionXZ = new Vector3(_target.transform.position.x, 0, _target.transform.position.z);
+        if (Vector3.Distance(originPositionXZ, targetPositionXZ) > 1.5*jumpRange)
+            return false;
+
+        return true;
     }
 
     bool CheckPlatformBoundaries(Collider _origin, Collider _target)
@@ -196,6 +212,8 @@ public class LDChecker : MonoBehaviour {
                 if (targetCollider != null)
                 {
                     Parabola parabola = new Parabola(startCollider.transform, targetCollider.transform);
+                    if (refreshDraw) drawParabola = parabola;
+
                     DebugDrawParabola(parabola);
                     DebugDrawDetectionPoints(parabola, targetCollider);
                 }
@@ -214,11 +232,15 @@ public class LDChecker : MonoBehaviour {
 
     void DebugDrawParabola(Parabola _parabola)
     {
-        for (float x = 0; x < 10; x += 0.05f)
+        if (!refreshDraw)
         {
-            Gizmos.DrawLine(Vector3.up * (_parabola.a * x * x + _parabola.b * x + _parabola.c) + _parabola.direction * x + _parabola.origin,
-                Vector3.up * (_parabola.a * (x + 0.05f) * (x + 0.05f) + _parabola.b * (x + 0.05f) + _parabola.c) + _parabola.direction * (x + 0.05f) + _parabola.origin);
+            _parabola = drawParabola;
         }
+            for (float x = -2; x < 10; x += 0.05f)
+            {
+                Gizmos.DrawLine(Vector3.up * (_parabola.a * x * x + _parabola.b * x + _parabola.c) + _parabola.direction * x + _parabola.origin,
+                    Vector3.up * (_parabola.a * (x + 0.05f) * (x + 0.05f) + _parabola.b * (x + 0.05f) + _parabola.c) + _parabola.direction * (x + 0.05f) + _parabola.origin);
+            }
     }
 
     void DebugDrawDetectionPoints(Parabola _parabola, GameObject _target)

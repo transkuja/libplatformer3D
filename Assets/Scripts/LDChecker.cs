@@ -270,43 +270,46 @@ public class LDChecker : MonoBehaviour {
             potentialPaths.Add(tmp);
         }
 
+        for (int i = 0; i < potentialPaths.Count; i++)
+            Debug.Log(potentialPaths[i][0].transform.name);
+
         // Loop 
         bool hasReachTheEnd = false;
         int iteration = 0;
         while (!hasReachTheEnd && iteration < 50)
         {
-            List<List<GizmosDraw>> potentialPathsTmp = potentialPaths;
+            List<List<GizmosDraw>> potentialPathsTmp = new List<List<GizmosDraw>>();
+            potentialPathsTmp.AddRange(potentialPaths);
             potentialPaths.Clear();
             foreach (List<GizmosDraw> subList in potentialPathsTmp)
             {
                 GizmosDraw subListParent = subList[subList.Count - 1];
-
+                Debug.Log(subListParent.transform.name);
                 foreach (GizmosDraw neighbor in subListParent.AreAccessibleFromThis)
                 {
                     if (neighbor.transform == endTransform)
                     {
                         hasReachTheEnd = true;
-                        List<GizmosDraw> tmp = new List<GizmosDraw>();
-                        tmp.AddRange(subList);
-                        tmp.Add(neighbor);
-                        potentialPaths.Add(tmp);
-
-                        break;
+                        potentialPaths.Clear();
                     }
 
                     if (neighbor == subListParent) continue;
                     if (neighbor.AreAccessibleFromThis != null && neighbor.AreAccessibleFromThis.Count > 1)
                     {
+                        Debug.Log("??");
                         List<GizmosDraw> tmp = new List<GizmosDraw>();
                         tmp.AddRange(subList);
                         tmp.Add(neighbor);
                         potentialPaths.Add(tmp);
+                        Debug.Log(neighbor.transform.name);
+                        if (hasReachTheEnd)
+                            break;
                     }
+                    //}
                 }
             }
             iteration++;
         }
-        Debug.Log(iteration);
         path.Add(startTransform);
         
         for (int i = 0; i < potentialPaths[0].Count; i++)

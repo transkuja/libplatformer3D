@@ -26,8 +26,16 @@ public class LDChecker : MonoBehaviour {
     public int nbOfPointsForDetection;
     private List<Collider> debugDrawTargets;
     
-    public Parabola drawParabola;
+    Parabola drawParabola;
     public bool refreshDraw = true;
+
+    public bool drawPathMode = false;
+    public bool drawPath = false;
+    public Transform startTransform;
+    public Transform endTransform;
+    [SerializeField]
+    List<Transform> path = new List<Transform>();
+    public bool computePathNeeded = false;
 
     void Start()
     {
@@ -219,6 +227,92 @@ public class LDChecker : MonoBehaviour {
                 }
             }         
         }
+
+        if (drawPathMode && drawPath)
+        {
+            Gizmos.color = Color.magenta;
+            for (int i = 0; i < path.Count - 1; i++)
+            {
+                Gizmos.DrawLine(path[i].position, path[i + 1].position);
+            }
+
+        }
+    }
+
+    void ComputePath()
+    {
+        if (startTransform == null)
+        {
+            Debug.LogWarning("start transform must not be null to compute a path!");
+            return;
+        }
+
+        if (endTransform == null)
+        {
+            Debug.LogWarning("end transform must not be null to compute a path!");
+            return;
+        }
+
+        GizmosDraw StartTransformData = startTransform.GetComponent<GizmosDraw>();
+        if (StartTransformData == null || StartTransformData.AreAccessibleFromThis == null || StartTransformData.AreAccessibleFromThis.Count == 0)
+        {
+            Debug.LogWarning("There's no path from here.");
+            return;
+        }
+
+        List<List<GizmosDraw>> potentialPaths = new List<List<GizmosDraw>>();
+
+        // Init
+        foreach (GizmosDraw neighbor in startTransform.GetComponent<GizmosDraw>().AreAccessibleFromThis)
+        {
+            List<GizmosDraw> tmp = new List<GizmosDraw>();
+            tmp.Add(neighbor);
+            potentialPaths.Add(tmp);
+        }
+
+        // Loop 
+        bool hasReachTheEnd = false;
+        int iteration = 0;
+        while (!hasReachTheEnd && iteration < 50)
+        {
+            List<List<GizmosDraw>> potentialPathsTmp = potentialPaths;
+            potentialPaths.Clear();
+            foreach (List<GizmosDraw> subList in potentialPathsTmp)
+            {
+                GizmosDraw subListParent = subList[subList.Count - 1];
+
+                foreach (GizmosDraw neighbor in subListParent.AreAccessibleFromThis)
+                {
+                    if (neighbor.transform == endTransform)
+                    {
+                        hasReachTheEnd = true;
+                        List<GizmosDraw> tmp = new List<GizmosDraw>();
+                        tmp.AddRange(subList);
+                        tmp.Add(neighbor);
+                        potentialPaths.Add(tmp);
+
+                        break;
+                    }
+
+                    if (neighbor == subListParent) continue;
+                    if (neighbor.AreAccessibleFromThis != null && neighbor.AreAccessibleFromThis.Count > 1)
+                    {
+                        List<GizmosDraw> tmp = new List<GizmosDraw>();
+                        tmp.AddRange(subList);
+                        tmp.Add(neighbor);
+                        potentialPaths.Add(tmp);
+                    }
+                }
+            }
+            iteration++;
+        }
+        Debug.Log(iteration);
+        path.Add(startTransform);
+        
+        for (int i = 0; i < potentialPaths[0].Count; i++)
+        {
+            path.Add(potentialPaths[0][i].transform);
+        }
     }
 
     void DebugDrawParabola(Parabola _parabola)
@@ -254,6 +348,13 @@ public class LDChecker : MonoBehaviour {
             targetCollider = tmp;
             exchangeStartAndTarget = false;
         }
+
+        if (computePathNeeded)
+        {
+            ComputePath();
+            computePathNeeded = false;
+        }
+        
     }
 
     #endregion

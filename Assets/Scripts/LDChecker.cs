@@ -234,7 +234,8 @@ public class LDChecker : MonoBehaviour {
             Gizmos.color = Color.magenta;
             for (int i = 0; i < path.Count - 1; i++)
             {
-                Gizmos.DrawLine(path[i].position, path[i + 1].position);
+                Gizmos.DrawLine(path[i].position + path[i].GetComponent<Collider>().bounds.extents.y * Vector3.up,
+                    path[i + 1].position + path[i + 1].GetComponent<Collider>().bounds.extents.y * Vector3.up);
             }
 
         }

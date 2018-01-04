@@ -234,6 +234,11 @@ public class LDChecker : MonoBehaviour {
             Gizmos.color = Color.magenta;
             for (int i = 0; i < path.Count - 1; i++)
             {
+                Parabola parabola = new Parabola(path[i], path[i+1]);
+                Vector3 originWithoutY = new Vector3(parabola.origin.x, 0, parabola.origin.z);
+                Vector3 targetWithoutY = new Vector3(path[i+1].position.x, 0, path[i+1].position.z);
+                parabola.Draw(0.05f, 0.0f, Vector3.Distance(originWithoutY, targetWithoutY));
+
                 Gizmos.DrawLine(path[i].position + path[i].GetComponent<Collider>().bounds.extents.y * Vector3.up,
                     path[i + 1].position + path[i + 1].GetComponent<Collider>().bounds.extents.y * Vector3.up);
             }

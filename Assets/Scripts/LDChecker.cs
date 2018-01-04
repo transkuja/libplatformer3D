@@ -22,7 +22,7 @@ public class LDChecker : MonoBehaviour {
     public GameObject targetCollider;
     public bool exchangeStartAndTarget = false;
     public bool drawDetectionPoints;
-    public Color debugDetectionPoitnsColor = Color.magenta;
+    public Color debugDetectionPointsColor = Color.magenta;
     public int nbOfPointsForDetection;
     private List<Collider> debugDrawTargets;
     
@@ -261,6 +261,7 @@ public class LDChecker : MonoBehaviour {
         }
 
         List<List<GizmosDraw>> potentialPaths = new List<List<GizmosDraw>>();
+        path.Clear();
 
         // Init
         foreach (GizmosDraw neighbor in startTransform.GetComponent<GizmosDraw>().AreAccessibleFromThis)
@@ -276,7 +277,7 @@ public class LDChecker : MonoBehaviour {
         // Loop 
         bool hasReachTheEnd = false;
         int iteration = 0;
-        while (!hasReachTheEnd && iteration < 50)
+        while (!hasReachTheEnd && iteration < 150)
         {
             List<List<GizmosDraw>> potentialPathsTmp = new List<List<GizmosDraw>>();
             potentialPathsTmp.AddRange(potentialPaths);
@@ -287,6 +288,9 @@ public class LDChecker : MonoBehaviour {
                 Debug.Log(subListParent.transform.name);
                 foreach (GizmosDraw neighbor in subListParent.AreAccessibleFromThis)
                 {
+                    if (subList.Contains(neighbor))
+                        continue;
+
                     if (neighbor.transform == endTransform)
                     {
                         hasReachTheEnd = true;
@@ -332,7 +336,7 @@ public class LDChecker : MonoBehaviour {
     {
         if (drawDetectionPoints && nbOfPointsForDetection > 0)
         {
-            Gizmos.color = debugDetectionPoitnsColor;
+            Gizmos.color = debugDetectionPointsColor;
             Vector3[] posOnParabola;
 
             posOnParabola = _parabola.GetNPointsInWorld(_target.transform.position, _target.GetComponent<Collider>().bounds.extents, startCollider.transform.position, nbOfPointsForDetection);

@@ -122,13 +122,14 @@ public class LDChecker : MonoBehaviour {
     bool ObviousChecks(Collider _origin, Collider _target)
     {
         // Height check
-        if (_target.transform.position.y - _origin.transform.position.y > jumpHeight)
+        if (((_target.transform.position.y + _target.bounds.extents.y) - (_origin.transform.position.y + _origin.bounds.extents.y)) > jumpHeight)
             return false;
 
         // Range check
         Vector3 targetClosestPosition = Physics.ClosestPoint(_origin.transform.position, _target, _target.transform.position, _target.transform.rotation);
         Vector3 originPositionXZ = new Vector3(_origin.transform.position.x, 0, _origin.transform.position.z);
         Vector3 targetPositionXZ = new Vector3(targetClosestPosition.x, 0, targetClosestPosition.z);
+
         if (Vector3.Distance(originPositionXZ, targetPositionXZ) > 1.5*jumpRange)
             return false;
 
@@ -162,7 +163,7 @@ public class LDChecker : MonoBehaviour {
     {
         Parabola testParabola = new Parabola(_origin.transform, _target.transform);
 
-        Vector3[] posOnParabola = testParabola.GetNPointsInWorld(_target.transform.position, _target.bounds.extents, _origin.transform.position, 10);
+        Vector3[] posOnParabola = testParabola.GetNPointsInWorld(_target.transform.position, _target.bounds.extents, _origin.transform.position + (Vector3.up * _origin.bounds.extents.y), 10);
 
         if (ThereIsAPointAbove(posOnParabola, _target))
         {
@@ -277,7 +278,7 @@ public class LDChecker : MonoBehaviour {
         // Loop 
         bool hasReachTheEnd = false;
         int iteration = 0;
-        while (!hasReachTheEnd && iteration < 150)
+        while (!hasReachTheEnd && iteration < 20)
         {
             List<List<GizmosDraw>> potentialPathsTmp = new List<List<GizmosDraw>>();
             potentialPathsTmp.AddRange(potentialPaths);

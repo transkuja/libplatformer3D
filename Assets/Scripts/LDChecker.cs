@@ -1,4 +1,11 @@
-﻿using System.Collections;
+﻿/*
+ * Vazeille Anthony 01/01/2018
+ * Main script of the project, should be attached to an empty gameobject in scene.
+ * Process colliders on Start to check if they are accessible or not. It's also possible
+ * to specify a start point and destination and check if a path exists.
+ */
+
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -9,33 +16,44 @@ public class LDChecker : MonoBehaviour {
 
     public float jumpHeight;
     public float jumpRange;
-    public float gravity;
-    float jumpRangeEpsilon;
 
     float epsilonDetectionPlatformAbove = 0.01f;
 
     // Debug variables
     [Header("Debug")]
-    public bool drawDebugParabolas;
+    [Tooltip("Draw a parabola between startCollider and targetCollider")]
+    public bool drawDebugParabola;
+    [Tooltip("Change the color of debug parabolas")]
     public Color debugParabolasColor = Color.magenta;
+    [Tooltip("Start collider for drawing a parabola")]
     public GameObject startCollider;
+    [Tooltip("Target collider for drawing a parabola")]
     public GameObject targetCollider;
+    [Tooltip("Exchange startCollider with targetCollider")]
     public bool exchangeStartAndTarget = false;
+    [Tooltip("Draw the points used for parabola detection")]
     public bool drawDetectionPoints;
+    [Tooltip("Change the color of the detection points drawn")]
     public Color debugDetectionPointsColor = Color.magenta;
+    [Tooltip("The number of detection points to display on the parabola")]
     public int nbOfPointsForDetection;
     private List<Collider> debugDrawTargets;
     
     Parabola drawParabola;
+    [Tooltip("Freeze gizmos status if set to false")]
     public bool refreshDraw = true;
 
-    public bool drawPathMode = false;
+    [Header("Draw path tool")]
+    [Tooltip("Starting point for the path to be computed.")]
+    public Transform pathStart;
+    [Tooltip("Destination for the path to be computed.")]
+    public Transform pathDestination;
+    [Tooltip("Set this to true to compute the path once start and destination are specified.")]
+    public bool computePath = false;
+    [Tooltip("Set this to true to show the path computed.")]
     public bool drawPath = false;
-    public Transform startTransform;
-    public Transform endTransform;
-    [SerializeField]
+
     List<Transform> path = new List<Transform>();
-    public bool computePathNeeded = false;
 
     void Start()
     {
@@ -74,6 +92,7 @@ public class LDChecker : MonoBehaviour {
         }
     }
 
+    // Load all colliders from scene
     void LoadColliders()
     {
         Collider[] tmpColliders = FindObjectsOfType<Collider>();
@@ -90,6 +109,7 @@ public class LDChecker : MonoBehaviour {
         
     }
 
+    // Check all colliders accessibility from each other
     void CheckAccessibility(Collider _jumpOrigin)
     {
         foreach (Collider target in colliders)
@@ -98,6 +118,7 @@ public class LDChecker : MonoBehaviour {
             {
                 if (ObviousChecks(_jumpOrigin, target))
                 {
+                    // Checks platform overlapping
                     if ((target.transform.position.y >= _jumpOrigin.transform.position.y && IsOriginWiderOnXOrZAxis(_jumpOrigin, target))
                         || (target.transform.position.y < _jumpOrigin.transform.position.y && IsOriginWiderOnXOrZAxis(target, _jumpOrigin)))
                     {
@@ -183,8 +204,120 @@ public class LDChecker : MonoBehaviour {
         return false;
     }
 
-    #region Helper
+    // Try to compute a path from pathStart to pathDestination
+    void ComputePath()
+    {
+        if (pathStart == null)
+        {
+            Debug.LogWarning("start transform must not be null to compute a path!");
+            return;
+        }
 
+        if (pathDestination == null)
+        {
+            Debug.LogWarning("end transform must not be null to compute a path!");
+            return;
+        }
+
+        GizmosDraw StartTransformData = pathStart.GetComponent<GizmosDraw>();
+        if (StartTransformData == null || StartTransformData.AreAccessibleFromThis == null || StartTransformData.AreAccessibleFromThis.Count == 0)
+        {
+            Debug.LogWarning("There's no path from here.");
+            return;
+        }
+
+        // Clear previous results
+        List<List<GizmosDraw>> potentialPaths = new List<List<GizmosDraw>>();
+        path.Clear();
+
+        // Get all accessible colliders from pathStart and initialize potential paths with them
+        foreach (GizmosDraw neighbor in pathStart.GetComponent<GizmosDraw>().AreAccessibleFromThis)
+        {
+            List<GizmosDraw> tmp = new List<GizmosDraw>();
+            tmp.Add(neighbor);
+            potentialPaths.Add(tmp);
+        }
+
+        // Loop 
+        bool hasReachTheEnd = false;
+        int iteration = 0;
+        while (!hasReachTheEnd && iteration < 20)
+        {
+            List<List<GizmosDraw>> potentialPathsTmp = new List<List<GizmosDraw>>();
+            potentialPathsTmp.AddRange(potentialPaths);
+            potentialPaths.Clear();
+
+            // For each potential paths already computed, create a new list for each accessible collider.
+            foreach (List<GizmosDraw> subList in potentialPathsTmp)
+            {
+                // Get accessible colliders from the last entry of the list.
+                GizmosDraw subListParent = subList[subList.Count - 1];
+                foreach (GizmosDraw neighbor in subListParent.AreAccessibleFromThis)
+                {
+                    // Do not create a new list if the path is looping.
+                    if (subList.Contains(neighbor))
+                        continue;
+
+                    // Stop if the destination is within the accessible colliders.
+                    if (neighbor.transform == pathDestination)
+                    {
+                        hasReachTheEnd = true;
+                        potentialPaths.Clear();
+                    }
+
+                    if (neighbor == subListParent) continue;
+
+                    // Build new lists with the previous computed ones + new accessible collider that has at least another neighbor.
+                    if (neighbor.AreAccessibleFromThis != null && neighbor.AreAccessibleFromThis.Count > 1)
+                    {
+                        List<GizmosDraw> tmp = new List<GizmosDraw>();
+                        tmp.AddRange(subList);
+                        tmp.Add(neighbor);
+                        potentialPaths.Add(tmp);
+                        if (hasReachTheEnd)
+                            break;
+                    }
+                }
+            }
+            iteration++;
+        }
+
+        // No path found
+        if (potentialPaths.Count == 0)
+        {
+            Debug.LogWarning("There's no path from " + pathStart.name + " to " + pathDestination.name);
+            return;
+        }
+
+        // Fill path
+        path.Add(pathStart);
+        for (int i = 0; i < potentialPaths[0].Count; i++)
+        {
+            path.Add(potentialPaths[0][i].transform);
+        }
+    }
+
+
+    private void Update()
+    {
+        // Helper
+        if (exchangeStartAndTarget)
+        {
+            GameObject tmp = startCollider;
+            startCollider = targetCollider;
+            targetCollider = tmp;
+            exchangeStartAndTarget = false;
+        }
+
+        if (computePath)
+        {
+            ComputePath();
+            computePath = false;
+        }
+
+    }
+
+    #region Helper
     List<Parabola> DebugGetParabolasForNearColliders(Collider _startCollider)
     {
         List<Parabola> result = new List<Parabola>();
@@ -204,7 +337,7 @@ public class LDChecker : MonoBehaviour {
 
     private void OnDrawGizmos()
     {
-        if (drawDebugParabolas)
+        if (drawDebugParabola)
         {
             Gizmos.color = debugParabolasColor;
             if (startCollider != null)
@@ -229,7 +362,7 @@ public class LDChecker : MonoBehaviour {
             }         
         }
 
-        if (drawPathMode && drawPath)
+        if (drawPath)
         {
             Gizmos.color = Color.magenta;
             for (int i = 0; i < path.Count - 1; i++)
@@ -243,92 +376,6 @@ public class LDChecker : MonoBehaviour {
                     path[i + 1].position + path[i + 1].GetComponent<Collider>().bounds.extents.y * Vector3.up);
             }
 
-        }
-    }
-
-    void ComputePath()
-    {
-        if (startTransform == null)
-        {
-            Debug.LogWarning("start transform must not be null to compute a path!");
-            return;
-        }
-
-        if (endTransform == null)
-        {
-            Debug.LogWarning("end transform must not be null to compute a path!");
-            return;
-        }
-
-        GizmosDraw StartTransformData = startTransform.GetComponent<GizmosDraw>();
-        if (StartTransformData == null || StartTransformData.AreAccessibleFromThis == null || StartTransformData.AreAccessibleFromThis.Count == 0)
-        {
-            Debug.LogWarning("There's no path from here.");
-            return;
-        }
-
-        List<List<GizmosDraw>> potentialPaths = new List<List<GizmosDraw>>();
-        path.Clear();
-
-        // Init
-        foreach (GizmosDraw neighbor in startTransform.GetComponent<GizmosDraw>().AreAccessibleFromThis)
-        {
-            List<GizmosDraw> tmp = new List<GizmosDraw>();
-            tmp.Add(neighbor);
-            potentialPaths.Add(tmp);
-        }
-
-        for (int i = 0; i < potentialPaths.Count; i++)
-            Debug.Log(potentialPaths[i][0].transform.name);
-
-        // Loop 
-        bool hasReachTheEnd = false;
-        int iteration = 0;
-        while (!hasReachTheEnd && iteration < 20)
-        {
-            List<List<GizmosDraw>> potentialPathsTmp = new List<List<GizmosDraw>>();
-            potentialPathsTmp.AddRange(potentialPaths);
-            potentialPaths.Clear();
-            foreach (List<GizmosDraw> subList in potentialPathsTmp)
-            {
-                GizmosDraw subListParent = subList[subList.Count - 1];
-                foreach (GizmosDraw neighbor in subListParent.AreAccessibleFromThis)
-                {
-                    if (subList.Contains(neighbor))
-                        continue;
-
-                    if (neighbor.transform == endTransform)
-                    {
-                        hasReachTheEnd = true;
-                        potentialPaths.Clear();
-                    }
-
-                    if (neighbor == subListParent) continue;
-                    if (neighbor.AreAccessibleFromThis != null && neighbor.AreAccessibleFromThis.Count > 1)
-                    {
-                        List<GizmosDraw> tmp = new List<GizmosDraw>();
-                        tmp.AddRange(subList);
-                        tmp.Add(neighbor);
-                        potentialPaths.Add(tmp);
-                        if (hasReachTheEnd)
-                            break;
-                    }
-                }
-            }
-            iteration++;
-        }
-        
-        if (potentialPaths.Count == 0)
-        {
-            Debug.LogWarning("There's no path from " + startTransform.name + " to " + endTransform.name);
-            return;
-        }
-
-        path.Add(startTransform);
-
-        for (int i = 0; i < potentialPaths[0].Count; i++)
-        {
-            path.Add(potentialPaths[0][i].transform);
         }
     }
 
@@ -354,25 +401,5 @@ public class LDChecker : MonoBehaviour {
                 Gizmos.DrawSphere(posOnParabola[i], 0.25f);
         }
     }
-
-    private void Update()
-    {
-        // Helper
-        if (exchangeStartAndTarget)
-        {
-            GameObject tmp = startCollider;
-            startCollider = targetCollider;
-            targetCollider = tmp;
-            exchangeStartAndTarget = false;
-        }
-
-        if (computePathNeeded)
-        {
-            ComputePath();
-            computePathNeeded = false;
-        }
-        
-    }
-
     #endregion
 }

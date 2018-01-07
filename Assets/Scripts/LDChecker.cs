@@ -292,7 +292,6 @@ public class LDChecker : MonoBehaviour {
             foreach (List<GizmosDraw> subList in potentialPathsTmp)
             {
                 GizmosDraw subListParent = subList[subList.Count - 1];
-                Debug.Log(subListParent.transform.name);
                 foreach (GizmosDraw neighbor in subListParent.AreAccessibleFromThis)
                 {
                     if (subList.Contains(neighbor))
@@ -307,22 +306,26 @@ public class LDChecker : MonoBehaviour {
                     if (neighbor == subListParent) continue;
                     if (neighbor.AreAccessibleFromThis != null && neighbor.AreAccessibleFromThis.Count > 1)
                     {
-                        Debug.Log("??");
                         List<GizmosDraw> tmp = new List<GizmosDraw>();
                         tmp.AddRange(subList);
                         tmp.Add(neighbor);
                         potentialPaths.Add(tmp);
-                        Debug.Log(neighbor.transform.name);
                         if (hasReachTheEnd)
                             break;
                     }
-                    //}
                 }
             }
             iteration++;
         }
-        path.Add(startTransform);
         
+        if (potentialPaths.Count == 0)
+        {
+            Debug.LogWarning("There's no path from " + startTransform.name + " to " + endTransform.name);
+            return;
+        }
+
+        path.Add(startTransform);
+
         for (int i = 0; i < potentialPaths[0].Count; i++)
         {
             path.Add(potentialPaths[0][i].transform);

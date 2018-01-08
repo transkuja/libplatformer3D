@@ -1,0 +1,11 @@
+Accessibility
+get all colliders
+obvious checks
+overlap checks
+paraboles
+optimisation paraboles: 
+	tir depuis le bord,
+	prise en compte des bounds,
+	utilisation de plusieurs points de detection
+
+Pathfinding
